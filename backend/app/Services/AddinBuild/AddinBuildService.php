@@ -30,6 +30,7 @@ class AddinBuildService
 
         try {
             $manifestContent = $this->renderManifest($config, $buildType);
+            $this->assertValidXml($manifestContent);
             $manifestPath = $storageDir.DIRECTORY_SEPARATOR."manifest-{$buildToken}.xml";
             File::put($manifestPath, $manifestContent);
 
@@ -192,11 +193,28 @@ class AddinBuildService
 
     private function buildAssetUrl(string $origin, string $filename): string
     {
-        if (str_contains($origin, '/addin')) {
-            return rtrim($origin, '/').'/'.$filename;
+        return rtrim($origin, '/').'/addin/'.$filename;
+    }
+
+    private function assertValidXml(string $xml): void
+    {
+        $previous = libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $ok = $dom->loadXML($xml);
+        $errors = libxml_get_errors();
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        if ($ok) {
+            return;
         }
 
-        return rtrim($origin, '/').'/addin/'.$filename;
+        $first = $errors[0] ?? null;
+        $message = $first
+            ? sprintf('Manifest XML gecersiz: %s (line %d, col %d)', trim($first->message), $first->line, $first->column)
+            : 'Manifest XML gecersiz.';
+
+        throw new \RuntimeException($message);
     }
 
     private function addFolderToZip(ZipArchive $zip, string $folder, string $prefix): void
