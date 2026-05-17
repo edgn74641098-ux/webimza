@@ -136,7 +136,7 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <x-ui.button>Kaydet</x-ui.button>
+                        <x-ui.button type="submit">Kaydet</x-ui.button>
                         <a href="{{ route('admin.templates.index') }}"><x-ui.button type="button" variant="secondary">Vazgec</x-ui.button></a>
                     </div>
                 </form>
