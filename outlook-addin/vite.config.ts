@@ -5,6 +5,7 @@ export default defineConfig(async () => {
   const httpsOptions = await devCerts.getHttpsServerOptions();
 
   return {
+    base: "./",
     server: {
       host: "localhost",
       port: 5173,
