@@ -1,0 +1,16 @@
+/node_modules
+/vendor
+.env
+.env.*
+!.env.example
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/outlook-addin/node_modules
+/backend/node_modules
+/backend/vendor
+/backend/storage/logs/*.log
+/backend/storage/framework/cache/*
+/backend/storage/framework/sessions/*
+/backend/storage/framework/views/*
