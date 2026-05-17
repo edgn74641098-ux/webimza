@@ -57,7 +57,7 @@
                 </label>
 
                 <div class="flex items-center gap-2 pt-2">
-                    <x-ui.button>{{ isset($user) ? 'Guncelle' : 'Kaydet' }}</x-ui.button>
+                    <x-ui.button type="submit">{{ isset($user) ? 'Guncelle' : 'Kaydet' }}</x-ui.button>
                     <a href="{{ route('admin.users.index') }}"><x-ui.button type="button" variant="secondary">Vazgec</x-ui.button></a>
                 </div>
             </form>
