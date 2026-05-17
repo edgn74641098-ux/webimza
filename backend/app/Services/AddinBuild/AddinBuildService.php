@@ -17,6 +17,8 @@ class AddinBuildService
         $storageDir = storage_path('app/addin-builds');
         File::ensureDirectoryExists($storageDir);
 
+        // Generate a fresh manifest ID per build to avoid Outlook-side manifest ID cache collisions.
+        $config->manifest_id = (string) Str::uuid();
         $version = $this->nextManifestVersion($config->manifest_version);
         $config->manifest_version = $version;
         $buildToken = now()->format('YmdHis').'-'.Str::lower(Str::random(6));
