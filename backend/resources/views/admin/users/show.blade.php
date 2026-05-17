@@ -11,10 +11,10 @@
     <x-ui.app-shell x-data="{ tab: 'general' }">
         <x-ui.card>
             <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
-                <x-ui.button type="button" variant="secondary" @click="tab='general'" :class="tab==='general' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">1. Genel Bilgiler</x-ui.button>
-                <x-ui.button type="button" variant="secondary" @click="tab='preview'" :class="tab==='preview' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">2. Imza Onizleme</x-ui.button>
-                <x-ui.button type="button" variant="secondary" @click="tab='devices'" :class="tab==='devices' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">3. Cihazlar</x-ui.button>
-                <x-ui.button type="button" variant="secondary" @click="tab='logs'" :class="tab==='logs' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">4. Loglar</x-ui.button>
+                <x-ui.button type="button" variant="secondary" @click="tab='general'" x-bind:class="tab==='general' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">1. Genel Bilgiler</x-ui.button>
+                <x-ui.button type="button" variant="secondary" @click="tab='preview'" x-bind:class="tab==='preview' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">2. Imza Onizleme</x-ui.button>
+                <x-ui.button type="button" variant="secondary" @click="tab='devices'" x-bind:class="tab==='devices' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">3. Cihazlar</x-ui.button>
+                <x-ui.button type="button" variant="secondary" @click="tab='logs'" x-bind:class="tab==='logs' ? '!border-blue-700 !text-blue-700 !bg-blue-50' : ''">4. Loglar</x-ui.button>
             </div>
 
             <div x-show="tab==='general'" class="pt-5">
