@@ -155,6 +155,7 @@ class AddinConfigController extends Controller
     {
         $apiFilled = ! empty($config->api_base_url);
         $apiHttps = $this->isHttpsUrl($config->api_base_url);
+        $apiPathLooksRight = $this->apiBaseLooksValid($config->api_base_url);
         $taskpaneHttps = $this->isHttpsUrl($config->taskpane_url);
         $iconsExist = ! empty($config->icon_url);
         $manifestGuid = $this->isGuid((string) $config->manifest_id);
@@ -163,6 +164,7 @@ class AddinConfigController extends Controller
         return [
             ['label' => 'API URL dolu mu?', 'ok' => $apiFilled, 'detail' => $config->api_base_url ?: '-'],
             ['label' => 'API URL HTTPS mi?', 'ok' => $apiHttps, 'detail' => $config->api_base_url ?: '-'],
+            ['label' => 'API URL /api ile bitiyor mu?', 'ok' => $apiPathLooksRight, 'detail' => $config->api_base_url ?: '-'],
             ['label' => 'Taskpane URL HTTPS mi?', 'ok' => $taskpaneHttps, 'detail' => $config->taskpane_url ?: '-'],
             ['label' => 'Manifest ID GUID mi?', 'ok' => $manifestGuid, 'detail' => $config->manifest_id ?: '-'],
             ['label' => 'Version format dogru mu?', 'ok' => $versionFormat, 'detail' => $config->manifest_version ?: '-'],
@@ -190,6 +192,15 @@ class AddinConfigController extends Controller
     private function isVersionFormat(string $value): bool
     {
         return (bool) preg_match('/^\d+\.\d+\.\d+\.\d+$/', $value);
+    }
+
+    private function apiBaseLooksValid(?string $url): bool
+    {
+        if (! $url) {
+            return false;
+        }
+
+        return str_ends_with(rtrim(strtolower($url), '/'), '/api');
     }
 
 }
