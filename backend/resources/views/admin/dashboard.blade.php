@@ -60,7 +60,7 @@
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
                 <a href="{{ route('admin.templates.create') }}"><x-ui.button class="w-full">Yeni Sablon Olustur</x-ui.button></a>
                 <a href="{{ route('admin.updates.index') }}"><x-ui.button variant="secondary" class="w-full" type="button">Guncelleme Baslat</x-ui.button></a>
-                <form method="POST" action="{{ route('admin.deployment.build') }}" class="w-full">@csrf <x-ui.button variant="secondary" class="w-full">Deployment Manifest Olustur</x-ui.button></form>
+                <form method="POST" action="{{ route('admin.deployment.build') }}" class="w-full">@csrf <x-ui.button type="submit" variant="secondary" class="w-full">Deployment Manifest Olustur</x-ui.button></form>
                 <a href="{{ route('admin.logs.index') }}"><x-ui.button variant="secondary" class="w-full" type="button">Loglari Goruntule</x-ui.button></a>
             </div>
         </x-ui.card>

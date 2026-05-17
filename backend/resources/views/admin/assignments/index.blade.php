@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="lg:col-span-2 flex items-center gap-2">
-                    <x-ui.button>Atamayi Kaydet</x-ui.button>
+                    <x-ui.button type="submit">Atamayi Kaydet</x-ui.button>
                 </div>
             </form>
         </x-ui.card>

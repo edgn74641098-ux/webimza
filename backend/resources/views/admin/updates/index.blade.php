@@ -81,7 +81,7 @@
                 <div class="flex gap-2">
                     <x-ui.button type="button" variant="secondary" x-show="step > 1" @click="step--">Geri</x-ui.button>
                     <x-ui.button type="button" x-show="step < 3" @click="step++">Ileri</x-ui.button>
-                    <x-ui.button x-show="step===3">Force Update Baslat</x-ui.button>
+                    <x-ui.button type="submit" x-show="step===3">Force Update Baslat</x-ui.button>
                 </div>
             </form>
         </x-ui.card>

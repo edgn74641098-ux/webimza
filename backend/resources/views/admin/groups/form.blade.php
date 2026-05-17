@@ -37,7 +37,7 @@
                 </x-ui.card>
 
                 <div class="flex items-center gap-2">
-                    <x-ui.button>{{ $group->exists ? 'Guncelle' : 'Kaydet' }}</x-ui.button>
+                    <x-ui.button type="submit">{{ $group->exists ? 'Guncelle' : 'Kaydet' }}</x-ui.button>
                     <a href="{{ route('admin.groups.index') }}"><x-ui.button variant="secondary" type="button">Iptal</x-ui.button></a>
                 </div>
             </form>
