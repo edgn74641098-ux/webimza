@@ -66,8 +66,10 @@ class AddinRegisterController extends Controller
 
         $deviceId = $payload['deviceId'] ?? (string) Str::uuid();
 
-        AddinDevice::updateOrCreate(['device_id' => $deviceId], [
+        // Keep exactly one device row per user email in admin panel.
+        AddinDevice::updateOrCreate(['email' => $payload['email']], [
             'user_id' => $user->id,
+            'device_id' => $deviceId,
             'email' => $payload['email'],
             'display_name' => $payload['displayName'] ?? null,
             'client_type' => $payload['clientType'] ?? 'unknown',

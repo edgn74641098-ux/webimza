@@ -33,7 +33,8 @@ class SignatureReportController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        AddinDevice::where('device_id', $payload['deviceId'])->update([
+        AddinDevice::where('email', $payload['email'])->update([
+            'device_id' => $payload['deviceId'],
             'last_signature_version' => $payload['signatureVersion'] ?? null,
             'last_seen_at' => now(),
         ]);

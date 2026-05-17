@@ -21,8 +21,9 @@ class HeartbeatController extends Controller
 
         $user = User::where('email', $payload['email'])->first();
 
-        AddinDevice::updateOrCreate(['device_id' => $payload['deviceId']], [
+        AddinDevice::updateOrCreate(['email' => $payload['email']], [
             'user_id' => $user?->id,
+            'device_id' => $payload['deviceId'],
             'email' => $payload['email'],
             'client_type' => $payload['clientType'] ?? 'unknown',
             'office_version' => $payload['officeVersion'] ?? null,
