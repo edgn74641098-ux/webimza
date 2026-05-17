@@ -79,8 +79,8 @@
 
             <x-ui.card title="3. Build Actions">
                 <div class="space-y-2">
-                    <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="manual_basic"><x-ui.button type="submit" class="w-full">Basic Manual Manifest olustur</x-ui.button></form>
-                    <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="automatic_event"><x-ui.button type="submit" class="w-full" variant="secondary">Automatic Event-based Manifest olustur</x-ui.button></form>
+                    <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="manual_basic"><x-ui.button type="submit" class="w-full">Kisisel Outlook Test Manifesti olustur</x-ui.button></form>
+                    <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="automatic_event"><x-ui.button type="submit" class="w-full" variant="secondary">M365 Admin Otomatik Manifest olustur</x-ui.button></form>
                 </div>
             </x-ui.card>
         </div>
@@ -106,7 +106,7 @@
                         @foreach($builds as $build)
                             <tr>
                                 <td>#{{ $build->id }}</td>
-                                <td>{{ $build->build_type ?? '-' }}</td>
+                                <td>{{ $build->build_type === 'automatic_event' ? 'M365 otomatik' : 'Kisisel test' }}</td>
                                 <td>{{ $build->version ?? '-' }}</td>
                                 <td><x-ui.badge status="default">{{ $build->status ?? '-' }}</x-ui.badge></td>
                                 <td>{{ optional($build->created_at)?->format('Y-m-d H:i') ?? '-' }}</td>

@@ -9,7 +9,7 @@ class AddinBuild extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['config_id', 'version', 'status', 'manifest_path', 'package_path', 'notes', 'created_by'];
+    protected $fillable = ['config_id', 'build_type', 'version', 'status', 'manifest_path', 'package_path', 'notes', 'created_by'];
 
     public function config()
     {

@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('addin_builds', function (Blueprint $table) {
             $table->id();
             $table->foreignId('config_id')->constrained('addin_configs')->cascadeOnDelete();
+            $table->string('build_type')->default('manual_basic');
             $table->string('version');
             $table->string('status')->default('created');
             $table->string('manifest_path')->nullable();

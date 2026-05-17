@@ -25,6 +25,7 @@ class AddinBuildService
 
         $build = AddinBuild::create([
             'config_id' => $config->id,
+            'build_type' => $buildType,
             'version' => $version,
             'status' => 'building',
             'created_by' => $userId,
