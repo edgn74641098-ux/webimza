@@ -36,6 +36,23 @@ export function getDiagnostics() {
 
 function getHostInfo() { return { host: Office.context?.diagnostics?.hostName ?? "Outlook", platform: Office.context?.diagnostics?.platform ?? "unknown", officeVersion: Office.context?.diagnostics?.version ?? "unknown" }; }
 function cacheKey(email: string): string { return `trinox_signature_cache_${email}`; }
+function stableHash(input: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+  }
+
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function buildStableDeviceId(email: string): string {
+  const { host, platform } = getHostInfo();
+  const clientType = getClientType();
+  const seed = `${email.toLowerCase()}|${host}|${platform}|${clientType}`;
+  return `trinox-${stableHash(seed)}`;
+}
+
 function getClientType(): string {
   const host = String(Office.context?.diagnostics?.hostName ?? "").toLowerCase();
   if (host.includes("outlookwebapp") || host.includes("web")) return "outlook_web";
@@ -76,9 +93,9 @@ export async function getClientSummary(): Promise<{ email: string; displayName: 
 
 async function getCache(email: string): Promise<SignatureCache> {
   const raw = await storageGet(cacheKey(email));
-  if (!raw) return { deviceId: crypto.randomUUID(), lastUserEmail: email };
-  try { const parsed = JSON.parse(raw) as SignatureCache; if (!parsed.deviceId) parsed.deviceId = crypto.randomUUID(); return parsed; }
-  catch { return { deviceId: crypto.randomUUID(), lastUserEmail: email }; }
+  if (!raw) return { deviceId: buildStableDeviceId(email), lastUserEmail: email };
+  try { const parsed = JSON.parse(raw) as SignatureCache; if (!parsed.deviceId) parsed.deviceId = buildStableDeviceId(email); return parsed; }
+  catch { return { deviceId: buildStableDeviceId(email), lastUserEmail: email }; }
 }
 
 async function saveCache(email: string, cache: SignatureCache): Promise<void> { await storageSet(cacheKey(email), JSON.stringify(cache)); }
