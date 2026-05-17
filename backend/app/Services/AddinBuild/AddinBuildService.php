@@ -116,7 +116,7 @@ class AddinBuildService
     </Form>
   </FormSettings>
   <Permissions>ReadWriteItem</Permissions>
-  <RuleCollection xsi:type=\"RuleCollection\" Mode=\"Or\"><Rule xsi:type=\"ItemIs\" ItemType=\"Message\" FormType=\"Edit\"/></RuleCollection>
+  <Rule xsi:type=\"RuleCollection\" Mode=\"Or\"><Rule xsi:type=\"ItemIs\" ItemType=\"Message\" FormType=\"Edit\"/></Rule>
   <VersionOverrides xmlns=\"http://schemas.microsoft.com/office/mailappversionoverrides\" xsi:type=\"VersionOverridesV1_0\">
     <VersionOverrides xmlns=\"http://schemas.microsoft.com/office/mailappversionoverrides/1.1\" xsi:type=\"VersionOverridesV1_1\">
     <Requirements>
