@@ -16,16 +16,19 @@ class AddinConfigController extends Controller
         $config = AddinConfig::first();
 
         if (! $config) {
+            $baseUrl = rtrim((string) config('app.url', 'http://127.0.0.1:8000'), '/');
             $config = AddinConfig::create([
                 'name' => 'default',
                 'manifest_id' => (string) Str::uuid(),
-                'api_base_url' => 'http://127.0.0.1:8000/api',
+                'api_base_url' => $baseUrl.'/api',
                 'manifest_version' => '1.1.0.0',
                 'provider_name' => 'TRINOX',
                 'display_name' => 'TRINOX Signature Manager',
-                'support_url' => 'https://trinoxmetal.com',
-                'taskpane_url' => 'https://localhost:5173/index.html',
-                'autorun_url' => 'https://localhost:5173/autorun.html',
+                'support_url' => $baseUrl,
+                'taskpane_url' => $baseUrl.'/addin/index.html',
+                'autorun_url' => $baseUrl.'/addin/autorun.html',
+                'icon_url' => $baseUrl.'/addin/icon-32.png',
+                'highres_icon_url' => $baseUrl.'/addin/icon-80.png',
             ]);
         }
 

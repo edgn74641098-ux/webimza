@@ -73,15 +73,16 @@ class AddinBuildService
         $id = $config->manifest_id ?: '8c6b669e-4f1d-4fea-8aaf-7dff44f1e4d4';
         $taskpaneUrl = $config->taskpane_url ?: 'https://localhost:5173/index.html';
         $autorunUrl = $config->autorun_url ?: 'https://localhost:5173/autorun.html';
-        $icon16 = 'https://localhost:5173/icon-16.png';
-        $icon = $config->icon_url ?: 'https://localhost:5173/icon-32.png';
-        $high = $config->highres_icon_url ?: 'https://localhost:5173/icon-64.png';
-        $icon80 = 'https://localhost:5173/icon-80.png';
+        $origin = $this->buildAppDomain($taskpaneUrl);
+        $icon16 = $this->buildAssetUrl($origin, 'icon-16.png');
+        $icon = $config->icon_url ?: $this->buildAssetUrl($origin, 'icon-32.png');
+        $high = $config->highres_icon_url ?: $this->buildAssetUrl($origin, 'icon-64.png');
+        $icon80 = $this->buildAssetUrl($origin, 'icon-80.png');
         $supportUrl = $config->support_url ?: 'https://trinoxmetal.com';
         $providerName = $config->provider_name ?: 'TRINOX';
         $displayName = $config->display_name ?: 'TRINOX Signature Manager';
         $version = $config->manifest_version ?: '1.1.0.0';
-        $appDomain = $this->buildAppDomain($taskpaneUrl);
+        $appDomain = $origin;
 
         $launchEventBlock = '';
         if ($buildType === 'automatic_event') {
@@ -187,6 +188,15 @@ class AddinBuildService
     private function xml(string $value): string
     {
         return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    }
+
+    private function buildAssetUrl(string $origin, string $filename): string
+    {
+        if (str_contains($origin, '/addin')) {
+            return rtrim($origin, '/').'/'.$filename;
+        }
+
+        return rtrim($origin, '/').'/addin/'.$filename;
     }
 
     private function addFolderToZip(ZipArchive $zip, string $folder, string $prefix): void
