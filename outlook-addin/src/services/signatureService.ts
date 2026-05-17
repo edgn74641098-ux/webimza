@@ -159,10 +159,10 @@ export async function applySignatureFlow(forceCheck = false): Promise<{ status: 
   if (!doCheck && cache.lastSignatureHtml) {
     try {
       await setSignatureAsync(cache.lastSignatureHtml);
-      await reportResult({ email, deviceId: cache.deviceId, signatureVersion: cache.lastSignatureVersion, status: "success", message: "Signature applied from cache" });
+      await reportResult({ email, deviceId: cache.deviceId, signatureVersion: cache.lastSignatureVersion, status: "success", eventType: "signature_applied", message: "Signature applied from cache" });
       return { status: "success", detail: `Signature applied from cache (${cache.lastSignatureVersion ?? "unknown"})`, state: "cache_used" };
     } catch (error) {
-      await reportResult({ email, deviceId: cache.deviceId, status: "error", message: (error as Error).message });
+      await reportResult({ email, deviceId: cache.deviceId, status: "error", eventType: "signature_failed", message: (error as Error).message });
       return { status: "error", detail: (error as Error).message, state: "signature_failed" };
     }
   }
@@ -181,7 +181,7 @@ export async function applySignatureFlow(forceCheck = false): Promise<{ status: 
   cache.lastSuccessfulApplyAt = new Date().toISOString();
   await saveCache(email, cache);
 
-  await reportResult({ email, deviceId: cache.deviceId, signatureVersion: signature.signatureVersion, status: "success", message: signature.updateRequired ? "Signature updated from API" : "Signature applied" });
+  await reportResult({ email, deviceId: cache.deviceId, signatureVersion: signature.signatureVersion, status: "success", eventType: "signature_applied", message: signature.updateRequired ? "Signature updated from API" : "Signature applied" });
   return { status: "success", detail: `Signature applied (${signature.signatureVersion})`, state: "signature_applied" };
 }
 
@@ -229,6 +229,20 @@ export async function sendDiagnostic(): Promise<void> {
     email,
     deviceId: cache.deviceId,
     status: "success",
+    eventType: "diagnostic",
     message: `diagnostic:${JSON.stringify(diag)}`,
+  });
+}
+
+export async function reportAutorunTelemetry(stage: "triggered" | "completed" | "failed", detail?: string): Promise<void> {
+  const email = getEmail();
+  const cache = await getCache(email);
+
+  await reportResult({
+    email,
+    deviceId: cache.deviceId,
+    status: stage === "failed" ? "error" : "success",
+    eventType: `autorun_${stage}`,
+    message: detail,
   });
 }

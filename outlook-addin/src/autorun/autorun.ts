@@ -1,11 +1,14 @@
-import { applySignatureFlow } from "../services/signatureService";
+import { applySignatureFlow, reportAutorunTelemetry } from "../services/signatureService";
 
 declare const Office: any;
 
 async function onNewMessageComposeHandler(event: any) {
   try {
-    await applySignatureFlow();
-  } catch {
+    await reportAutorunTelemetry("triggered");
+    const result = await applySignatureFlow();
+    await reportAutorunTelemetry("completed", result.state);
+  } catch (error) {
+    await reportAutorunTelemetry("failed", (error as Error)?.message ?? "unknown_error");
     // Fail-safe by design: do not break compose flow.
   } finally {
     event.completed();

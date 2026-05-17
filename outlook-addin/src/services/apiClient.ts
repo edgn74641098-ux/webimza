@@ -51,6 +51,7 @@ export async function reportResult(payload: {
   signatureVersion?: string;
   status: "success" | "error";
   message?: string;
+  eventType?: string;
 }) {
   return postJson<{ success: boolean }>(`${config.apiBaseUrl}/addin/signature/report`, payload);
 }

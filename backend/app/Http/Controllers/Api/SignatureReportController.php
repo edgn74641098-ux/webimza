@@ -18,6 +18,7 @@ class SignatureReportController extends Controller
             'signatureVersion' => ['nullable', 'string'],
             'status' => ['required', 'string'],
             'message' => ['nullable', 'string'],
+            'eventType' => ['nullable', 'string'],
         ]);
 
         $user = User::where('email', $payload['email'])->first();
@@ -25,7 +26,7 @@ class SignatureReportController extends Controller
         AddinLog::create([
             'user_id' => $user?->id,
             'device_id' => $payload['deviceId'],
-            'event_type' => $payload['status'] === 'success' ? 'signature_applied' : 'signature_failed',
+            'event_type' => $payload['eventType'] ?? ($payload['status'] === 'success' ? 'signature_applied' : 'signature_failed'),
             'status' => $payload['status'],
             'message' => $payload['message'] ?? null,
             'payload_json' => json_encode($payload, JSON_UNESCAPED_UNICODE),
