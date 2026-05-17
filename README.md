@@ -22,7 +22,7 @@ php artisan serve
 ```
 
 Demo giris:
-- Email: `erkan.degnekci@trinoxmetal.com`
+- Email: `admin@webimza.com`
 - Sifre: `password`
 
 Panel:

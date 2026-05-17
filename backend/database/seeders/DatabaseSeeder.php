@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         $department = Department::firstOrCreate(['name' => 'Bilgi Islem'], ['description' => 'IT Department']);
 
         $user = User::updateOrCreate(
-            ['email' => 'erkan.degnekci@trinoxmetal.com'],
+            ['email' => 'admin@webimza.com'],
             [
                 'name' => 'Erkan Degnekci',
                 'department_id' => $department->id,

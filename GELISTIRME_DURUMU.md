@@ -61,7 +61,7 @@ Model siniflari ve iliskiler kuruldu:
 Demo veriler eklendi:
 
 - Departman: Bilgi Islem
-- Demo kullanici: `erkan.degnekci@trinoxmetal.com`
+- Demo kullanici: `admin@webimza.com`
 - Demo sablon: `TRINOX BT Signature`
 - Departman bazli sablon atamasi
 
@@ -102,7 +102,7 @@ Akis:
 
 - Login calisiyor
 - Demo hesapla giris yapilabiliyor:
-  - Email: `erkan.degnekci@trinoxmetal.com`
+  - Email: `admin@webimza.com`
   - Sifre: `password`
 
 ### 4.2 Admin Modulleri
