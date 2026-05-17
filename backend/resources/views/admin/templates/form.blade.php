@@ -29,6 +29,15 @@
                     const block = this.openTag + '#if Mobile' + this.closeTag + '\nMobil: ' + this.openTag + 'Mobile' + this.closeTag + '<br>\n' + this.openTag + '/if' + this.closeTag;
                     this.html = (this.html || '') + '\n' + block;
                 },
+                pasteHtmlFromClipboard(event) {
+                    const html = event?.clipboardData?.getData('text/html');
+                    if (!html) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    this.html = html;
+                },
                 async runPreview() {
                     this.previewLoading = true;
                     this.previewError = '';
@@ -117,7 +126,8 @@
 
                     <div>
                         <label class="mb-1 block text-sm font-medium text-slate-700">HTML icerik</label>
-                        <x-ui.textarea name="html_content" x-model="html" rows="12" class="font-mono" required />
+                        <p class="mb-2 text-xs text-slate-500">Word/Outlook'tan yapistirirken HTML korunmasi icin bu alana yapistirin (Ctrl+V).</p>
+                        <x-ui.textarea name="html_content" x-model="html" @paste="pasteHtmlFromClipboard($event)" rows="12" class="font-mono" required />
                     </div>
 
                     <div>
