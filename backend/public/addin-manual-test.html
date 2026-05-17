@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webimza Add-in Manual API Test</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --ok: #0f766e;
+      --warn: #b45309;
+      --err: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      padding: 24px;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    p { margin: 0; color: var(--muted); }
+    .grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .buttons {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { background: #f9fafb; }
+    .hint { margin-top: 8px; font-size: 13px; color: var(--warn); }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      line-height: 1.45;
+      background: #0b1020;
+      color: #d1e7ff;
+      padding: 12px;
+      border-radius: 6px;
+      min-height: 220px;
+      max-height: 420px;
+      overflow: auto;
+    }
+    .ok { color: var(--ok); font-weight: 600; }
+    .err { color: var(--err); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Add-in Manual API Test</h1>
+      <p>Outlook acmadan API zincirini elle test etmek icin kullanilir.</p>
+      <div class="grid">
+        <div>
+          <label for="apiBase">API Base URL</label>
+          <input id="apiBase" />
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" />
+        </div>
+        <div>
+          <label for="deviceId">Device ID</label>
+          <input id="deviceId" />
+        </div>
+        <div>
+          <label for="currentSignatureVersion">Current Signature Version</label>
+          <input id="currentSignatureVersion" placeholder="optional" />
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="btnPing">Ping (GET)</button>
+        <button id="btnRegister">Register (POST)</button>
+        <button id="btnHeartbeat">Heartbeat (POST)</button>
+        <button id="btnCheck">Signature Check (POST)</button>
+        <button id="btnReport">Report Success (POST)</button>
+        <button id="btnRunAll">Run All</button>
+        <button id="btnClear">Clear Log</button>
+      </div>
+      <div class="hint">Beklenen akıs: Ping -> Register -> Heartbeat -> Signature Check -> Report</div>
+    </div>
+
+    <div class="card">
+      <p id="status"></p>
+      <pre id="log"></pre>
+    </div>
+  </div>
+
+  <script>
+    const apiBaseInput = document.getElementById("apiBase");
+    const emailInput = document.getElementById("email");
+    const deviceIdInput = document.getElementById("deviceId");
+    const versionInput = document.getElementById("currentSignatureVersion");
+    const logEl = document.getElementById("log");
+    const statusEl = document.getElementById("status");
+
+    const nowTag = () => new Date().toISOString();
+    const randomId = () => {
+      if (crypto && crypto.randomUUID) return crypto.randomUUID();
+      return "dev-" + Math.random().toString(36).slice(2, 11);
+    };
+
+    function appendLog(title, data) {
+      logEl.textContent += `\n[${nowTag()}] ${title}\n${typeof data === "string" ? data : JSON.stringify(data, null, 2)}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setStatus(text, kind) {
+      statusEl.className = kind || "";
+      statusEl.textContent = text;
+    }
+
+    function cfg() {
+      const apiBase = apiBaseInput.value.trim().replace(/\/+$/, "");
+      const email = emailInput.value.trim();
+      const deviceId = deviceIdInput.value.trim();
+      const currentSignatureVersion = versionInput.value.trim();
+      return { apiBase, email, deviceId, currentSignatureVersion };
+    }
+
+    async function request(method, path, body) {
+      const { apiBase } = cfg();
+      const url = `${apiBase}${path}`;
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const text = await res.text();
+      let parsed = text;
+      try { parsed = JSON.parse(text); } catch (_) {}
+      return { url, status: res.status, ok: res.ok, body: parsed };
+    }
+
+    async function runPing() {
+      const r = await request("GET", "/addin/ping");
+      appendLog("PING", r);
+      return r;
+    }
+
+    async function runRegister() {
+      const { email, deviceId } = cfg();
+      const r = await request("POST", "/addin/register", {
+        email,
+        displayName: email.split("@")[0] || "manual-test",
+        deviceId,
+        clientType: "manual_test",
+        addinVersion: "manual"
+      });
+      appendLog("REGISTER", r);
+      return r;
+    }
+
+    async function runHeartbeat() {
+      const { email, deviceId } = cfg();
+      const r = await request("POST", "/addin/heartbeat", {
+        email,
+        deviceId,
+        clientType: "manual_test",
+        addinVersion: "manual"
+      });
+      appendLog("HEARTBEAT", r);
+      return r;
+    }
+
+    async function runCheck() {
+      const { email, deviceId, currentSignatureVersion } = cfg();
+      const r = await request("POST", "/addin/signature/check", {
+        email,
+        deviceId,
+        currentSignatureVersion: currentSignatureVersion || undefined
+      });
+      appendLog("SIGNATURE CHECK", r);
+      return r;
+    }
+
+    async function runReportSuccess() {
+      const { email, deviceId } = cfg();
+      const r = await request("POST", "/addin/signature/report", {
+        email,
+        deviceId,
+        status: "success",
+        message: "manual test report"
+      });
+      appendLog("REPORT", r);
+      return r;
+    }
+
+    async function runAll() {
+      try {
+        setStatus("Calisiyor...", "");
+        await runPing();
+        await runRegister();
+        await runHeartbeat();
+        await runCheck();
+        await runReportSuccess();
+        setStatus("Tum adimlar tamamlandi.", "ok");
+      } catch (e) {
+        setStatus("Bir adim hata verdi.", "err");
+        appendLog("ERROR", String(e));
+      }
+    }
+
+    document.getElementById("btnPing").onclick = async () => appendLog("PING", await runPing());
+    document.getElementById("btnRegister").onclick = async () => appendLog("REGISTER", await runRegister());
+    document.getElementById("btnHeartbeat").onclick = async () => appendLog("HEARTBEAT", await runHeartbeat());
+    document.getElementById("btnCheck").onclick = async () => appendLog("SIGNATURE CHECK", await runCheck());
+    document.getElementById("btnReport").onclick = async () => appendLog("REPORT", await runReportSuccess());
+    document.getElementById("btnRunAll").onclick = runAll;
+    document.getElementById("btnClear").onclick = () => { logEl.textContent = ""; setStatus("", ""); };
+
+    // Defaults
+    apiBaseInput.value = `${location.origin}/api`;
+    emailInput.value = "admin@webimza.com";
+    deviceIdInput.value = randomId();
+    versionInput.value = "";
+    appendLog("READY", { apiBase: apiBaseInput.value, email: emailInput.value, deviceId: deviceIdInput.value });
+  </script>
+</body>
+</html>
+

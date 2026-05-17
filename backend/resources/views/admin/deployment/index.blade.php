@@ -139,6 +139,10 @@
                     <div class="font-medium">Imza kontrolu (POST)</div>
                     <div class="mt-1 font-mono text-xs text-slate-600">{{ rtrim((string) ($config->api_base_url ?? ''), '/') }}/addin/signature/check</div>
                 </div>
+                <div class="rounded-lg border border-slate-200 px-3 py-2">
+                    <div class="font-medium">Manual API Test Sayfasi</div>
+                    <div class="mt-1 font-mono text-xs text-slate-600">{{ url('/addin-manual-test.html') }}</div>
+                </div>
             </div>
         </x-ui.card>
     </x-ui.app-shell>
