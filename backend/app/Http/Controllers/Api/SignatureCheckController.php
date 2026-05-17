@@ -23,12 +23,34 @@ class SignatureCheckController extends Controller
 
         $user = User::where('email', $payload['email'])->first();
         if (! $user) {
-            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            return response()->json([
+                'success' => false,
+                'state' => 'user_not_found',
+                'message' => 'User not found',
+                'updateRequired' => false,
+                'forceUpdate' => false,
+                'signatureVersion' => null,
+                'signatureName' => null,
+                'html' => '',
+                'text' => '',
+                'cacheSeconds' => 300,
+            ]);
         }
 
         $template = $assignmentService->resolveForUser($user);
         if (! $template) {
-            return response()->json(['success' => false, 'message' => 'Template not found'], 404);
+            return response()->json([
+                'success' => false,
+                'state' => 'no_template_assigned',
+                'message' => 'Template not found',
+                'updateRequired' => false,
+                'forceUpdate' => false,
+                'signatureVersion' => null,
+                'signatureName' => null,
+                'html' => '',
+                'text' => '',
+                'cacheSeconds' => 300,
+            ]);
         }
 
         $forceUpdate = ForceUpdate::query()

@@ -100,6 +100,7 @@ function setStateBanner(state: string) {
     loading: { text: "Loading", cls: "tp-state-loading" },
     api_offline: { text: "API offline", cls: "tp-state-error" },
     unsupported_client: { text: "Unsupported client", cls: "tp-state-warn" },
+    user_not_found: { text: "User not found", cls: "tp-state-warn" },
     no_template_assigned: { text: "No template assigned", cls: "tp-state-warn" },
     signature_applied: { text: "Signature applied", cls: "tp-state-ok" },
     signature_failed: { text: "Signature failed", cls: "tp-state-error" },
@@ -114,6 +115,17 @@ function setStateBanner(state: string) {
 async function refreshTaskpaneState() {
   try {
     const state = await getTaskpaneState();
+    const anyState = state as Record<string, unknown>;
+    if (anyState.success === false) {
+      const domainState = String(anyState.state ?? "no_template_assigned");
+      setStateBanner(domainState);
+      setText("s-version", "-");
+      setText("s-last", "-");
+      setUpdateBadge(false);
+      setStatus(String(anyState.message ?? "Atama bulunamadi."), "error");
+      return;
+    }
+
     setText("u-email", state.email || "-");
     setText("u-name", state.userName || "-");
     setText("u-client", state.clientType || "-");

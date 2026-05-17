@@ -14,3 +14,9 @@ Route::prefix('addin')->group(function () {
     Route::post('/signature/report', SignatureReportController::class);
     Route::post('/heartbeat', HeartbeatController::class);
 });
+
+// Backward compatibility for previously published add-in bundles.
+Route::post('/register', AddinRegisterController::class);
+Route::post('/signature/check', SignatureCheckController::class);
+Route::post('/signature/report', SignatureReportController::class);
+Route::post('/heartbeat', HeartbeatController::class);
