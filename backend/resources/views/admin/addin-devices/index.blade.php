@@ -7,7 +7,7 @@
             </x-slot>
         </x-ui.page-header>
     </x-slot>
-    <x-ui.app-shell x-data="{ drawer:false, diagnostic:null }">
+    <x-ui.app-shell x-data="{ drawer:false, diagnostic:null, selectedUserId: localStorage.getItem('selectedUserId') || '' }">
         <x-ui.card>
             <form class="grid grid-cols-1 gap-2 md:grid-cols-8">
                 <x-ui.select name="client_type"><option value="">Client Type</option>@foreach($clientTypes as $ct)<option value="{{ $ct }}" @selected(($filters['client_type'] ?? '')==$ct)>{{ $ct }}</option>@endforeach</x-ui.select>
@@ -28,7 +28,7 @@
                 <x-ui.table>
                     <x-slot name="head"><tr><th>Kullanıcı</th><th>E-posta</th><th>Device ID</th><th>Client Type</th><th>Platform</th><th>Host</th><th>Office Version</th><th>Add-in Version</th><th>Last Seen</th><th>Last Check</th><th>Last Signature Version</th><th>Status</th><th>Aksiyonlar</th></tr></x-slot>
                     @foreach($devices as $d)
-                        <tr>
+                        <tr x-bind:class="selectedUserId === '{{ (string) ($d->user_id ?? '') }}' ? 'bg-blue-50/70 ring-1 ring-inset ring-blue-200' : ''">
                             <td>{{ $d->user?->name ?? '-' }}</td>
                             <td>{{ $d->email ?? '-' }}</td>
                             <td>{{ $d->device_id ?? '-' }}</td>
@@ -44,7 +44,7 @@
                             <td>
                                 <div class="flex flex-wrap gap-1">
                                     @if($d->user_id)
-                                        <a href="{{ route('admin.users.show', $d->user_id) }}"><x-ui.button variant="secondary" type="button">Detay</x-ui.button></a>
+                                        <a href="{{ route('admin.users.show', $d->user_id) }}" @click="selectedUserId='{{ (string) $d->user_id }}'; localStorage.setItem('selectedUserId', selectedUserId)"><x-ui.button variant="secondary" type="button">Detay</x-ui.button></a>
                                     @else
                                         <x-ui.button variant="secondary" type="button" disabled>Detay</x-ui.button>
                                     @endif

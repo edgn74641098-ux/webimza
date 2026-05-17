@@ -7,7 +7,7 @@
         </x-ui.page-header>
     </x-slot>
 
-    <x-ui.app-shell>
+    <x-ui.app-shell x-data="{ selectedUserId: localStorage.getItem('selectedUserId') || '' }">
         <x-ui.card>
             <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 gap-3 md:grid-cols-4">
                 <x-ui.input name="q" :value="$filters['q'] ?? ''" placeholder="Kullanici, e-posta veya unvan ara" />
@@ -53,7 +53,7 @@
                     </x-slot>
 
                     @foreach($users as $user)
-                        <tr>
+                        <tr x-bind:class="selectedUserId === '{{ (string) $user->id }}' ? 'bg-blue-50/70 ring-1 ring-inset ring-blue-200' : ''">
                             <td class="font-medium text-slate-900">{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->department?->name ?? '-' }}</td>
@@ -71,7 +71,7 @@
                                     <x-slot name="trigger">
                                         <x-ui.button type="button" variant="secondary">Aksiyonlar</x-ui.button>
                                     </x-slot>
-                                    <a href="{{ route('admin.users.show', $user) }}" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Detay</a>
+                                    <a href="{{ route('admin.users.show', $user) }}" @click="selectedUserId='{{ (string) $user->id }}'; localStorage.setItem('selectedUserId', selectedUserId)" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Detay</a>
                                     <a href="{{ route('admin.users.edit', $user) }}" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Duzenle</a>
                                     <a href="{{ route('admin.updates.index', ['scope' => 'user', 'user_id' => $user->id]) }}" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Guncelleme baslat</a>
                                 </x-ui.dropdown>
