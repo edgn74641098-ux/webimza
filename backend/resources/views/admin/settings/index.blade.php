@@ -127,13 +127,13 @@
                                             <div class="{{ $span }}">
                                                 <label for="{{ $name }}" class="mb-1 block text-sm font-medium text-slate-700">{{ $field['label'] }}</label>
                                                 @if($type === 'select')
-                                                    <x-ui.select id="{{ $name }}" name="{{ $name }}" @if($required) required @endif>
+                                                    <x-ui.select id="{{ $name }}" name="{{ $name }}" :required="$required">
                                                         @foreach($field['options'] as $option)
                                                             <option value="{{ $option }}" @selected((string) $value === (string) $option)>{{ $option }}</option>
                                                         @endforeach
                                                     </x-ui.select>
                                                 @else
-                                                    <x-ui.input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}" :value="$value" @if($required) required @endif />
+                                                    <x-ui.input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}" :value="$value" :required="$required" />
                                                 @endif
                                                 <div class="mt-1 font-mono text-[11px] text-slate-400">{{ $name }}</div>
                                                 @error($name)
