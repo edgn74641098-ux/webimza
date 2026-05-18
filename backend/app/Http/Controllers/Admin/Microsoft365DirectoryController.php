@@ -77,16 +77,23 @@ class Microsoft365DirectoryController extends Controller
                 ->withErrors(['microsoft365' => 'Microsoft oturum kodu alinamadi. Lutfen tekrar deneyin.']);
         }
 
+        $tokenPayload = [
+            'client_id' => config('services.microsoft_graph.client_id'),
+            'grant_type' => 'authorization_code',
+            'code' => $request->query('code'),
+            'redirect_uri' => route('admin.microsoft365.callback'),
+            'code_verifier' => $verifier,
+            'scope' => implode(' ', self::SCOPES),
+        ];
+
+        // Some Entra app registrations are configured as confidential web apps and require a secret.
+        if (filled(config('services.microsoft_graph.client_secret'))) {
+            $tokenPayload['client_secret'] = config('services.microsoft_graph.client_secret');
+        }
+
         $response = Http::asForm()
             ->timeout(30)
-            ->post($this->authorityUrl().'/oauth2/v2.0/token', [
-                'client_id' => config('services.microsoft_graph.client_id'),
-                'grant_type' => 'authorization_code',
-                'code' => $request->query('code'),
-                'redirect_uri' => route('admin.microsoft365.callback'),
-                'code_verifier' => $verifier,
-                'scope' => implode(' ', self::SCOPES),
-            ]);
+            ->post($this->authorityUrl().'/oauth2/v2.0/token', $tokenPayload);
 
         if (! $response->successful()) {
             return redirect()
