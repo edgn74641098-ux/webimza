@@ -5,7 +5,8 @@
 
     <x-ui.app-shell>
         <x-ui.card>
-            <form method="GET" action="{{ route('admin.logs.index') }}" class="grid grid-cols-1 gap-3 md:grid-cols-5">
+            <form method="GET" action="{{ route('admin.logs.index') }}" class="grid grid-cols-1 gap-3 md:grid-cols-6">
+                <x-ui.input name="q" :value="$filters['q'] ?? ''" placeholder="Mesaj, event, cihaz veya e-posta ara" />
                 <x-ui.select name="event_type">
                     <option value="">Event type</option>
                     @foreach($eventTypes as $eventType)
@@ -34,7 +35,7 @@
 
         <x-ui.card>
             @if($logs->isEmpty())
-                <x-ui.empty-state title="Henüz add-in aktivitesi yok." description="Eklenti dagitildiktan sonra loglar burada gorunecek." />
+                <x-ui.empty-state title="Henuz add-in aktivitesi yok." description="Eklenti dagitildiktan sonra loglar burada gorunecek." />
             @else
                 <x-ui.table>
                     <x-slot name="head">
@@ -53,7 +54,7 @@
                             <td>{{ optional($log->created_at)?->format('Y-m-d H:i:s') ?? '-' }}</td>
                             <td>{{ $log->user?->email ?? '-' }}</td>
                             <td>{{ $log->event_type ?? '-' }}</td>
-                            <td><x-ui.badge status="default">{{ $log->status ?? '-' }}</x-ui.badge></td>
+                            <td><x-ui.badge :status="$log->status ?? 'default'">{{ $log->status ?? '-' }}</x-ui.badge></td>
                             <td>{{ $log->message ?: '-' }}</td>
                             <td>{{ $log->device_id ?? '-' }}</td>
                             <td><a href="{{ route('admin.logs.show', $log) }}"><x-ui.button type="button" variant="secondary">Detay</x-ui.button></a></td>
@@ -65,3 +66,4 @@
         </x-ui.card>
     </x-ui.app-shell>
 </x-app-layout>
+

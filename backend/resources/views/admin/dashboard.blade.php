@@ -29,7 +29,7 @@
                                 <td>{{ optional($activity->created_at)?->format('Y-m-d H:i') ?? '-' }}</td>
                                 <td>{{ $activity->user?->email ?? $activity->email ?? '-' }}</td>
                                 <td>{{ $activity->event_type ?? '-' }}</td>
-                                <td><x-ui.badge :type="$activity->status === 'error' ? 'danger' : 'success'">{{ $activity->status ?? 'info' }}</x-ui.badge></td>
+                                <td><x-ui.badge :status="$activity->status ?? 'default'">{{ $activity->status ?? 'info' }}</x-ui.badge></td>
                                 <td>{{ $activity->message ?: '-' }}</td>
                             </tr>
                         @endforeach

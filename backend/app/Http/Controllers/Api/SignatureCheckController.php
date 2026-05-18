@@ -18,6 +18,7 @@ class SignatureCheckController extends Controller
             'email' => ['required', 'email'],
             'deviceId' => ['required', 'string'],
             'currentSignatureVersion' => ['nullable', 'string'],
+            'currentSignatureHash' => ['nullable', 'string'],
             'lastCheckAt' => ['nullable', 'date'],
         ]);
 
@@ -72,8 +73,6 @@ class SignatureCheckController extends Controller
             })
             ->exists();
 
-        $updateRequired = $forceUpdate || ($payload['currentSignatureVersion'] ?? null) !== $template->version;
-
         AddinDevice::where('device_id', $payload['deviceId'])->update([
             'last_check_at' => now(),
             'last_seen_at' => now(),
@@ -81,12 +80,18 @@ class SignatureCheckController extends Controller
         ]);
 
         $rendered = $renderService->render($template, $user);
+        $signatureHash = hash('sha256', (string) $rendered['html']);
+
+        $updateRequired = $forceUpdate
+            || ($payload['currentSignatureVersion'] ?? null) !== $template->version
+            || (($payload['currentSignatureHash'] ?? null) !== $signatureHash);
 
         return response()->json([
             'success' => true,
             'updateRequired' => $updateRequired,
             'forceUpdate' => $forceUpdate,
             'signatureVersion' => $template->version,
+            'signatureHash' => $signatureHash,
             'signatureName' => $template->name,
             'html' => $rendered['html'],
             'text' => $rendered['text'],

@@ -5,7 +5,7 @@ import type { SignatureCache } from "../shared/types";
 
 declare const Office: any;
 
-function todayIsoDate(): string { return new Date().toISOString().slice(0, 10); }
+const DEFAULT_SIGNATURE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 function getMailbox() { return Office.context?.mailbox; }
 function getUserProfileRaw(): any { return getMailbox()?.userProfile ?? {}; }
 function getEmail(): string {
@@ -126,7 +126,19 @@ export async function testConnection(): Promise<string> {
   return "API baglantisi basarili.";
 }
 
-function shouldCheckSignature(cache: SignatureCache, forceUpdateHint = false): boolean { return forceUpdateHint || cache.lastCheckDate !== todayIsoDate(); }
+function shouldCheckSignature(cache: SignatureCache, forceUpdateHint = false): boolean {
+  if (forceUpdateHint) return true;
+  if (cache.nextCheckAt) {
+    const nextCheckAt = Date.parse(cache.nextCheckAt);
+    if (!Number.isNaN(nextCheckAt)) {
+      return Date.now() >= nextCheckAt;
+    }
+  }
+  if (!cache.lastCheckedAt) return true;
+  const lastCheckedAt = Date.parse(cache.lastCheckedAt);
+  if (Number.isNaN(lastCheckedAt)) return true;
+  return (Date.now() - lastCheckedAt) >= DEFAULT_SIGNATURE_CHECK_INTERVAL_MS;
+}
 
 function setSignatureAsync(html: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -184,15 +196,45 @@ export async function applySignatureFlow(forceCheck = false): Promise<{ status: 
     }
   }
 
-  const signature = await checkSignature({ email, deviceId: cache.deviceId, currentSignatureVersion: cache.lastSignatureVersion, lastCheckAt: cache.lastSuccessfulApplyAt });
+  let signature;
+  try {
+    signature = await checkSignature({
+      email,
+      deviceId: cache.deviceId,
+      currentSignatureVersion: cache.lastSignatureVersion,
+      currentSignatureHash: cache.lastSignatureHash,
+      lastCheckAt: cache.lastSuccessfulApplyAt,
+    });
+  } catch (error) {
+    if (cache.lastSignatureHtml) {
+      try {
+        await setSignatureAsync(cache.lastSignatureHtml);
+        await reportResult({ email, deviceId: cache.deviceId, signatureVersion: cache.lastSignatureVersion, status: "success", eventType: "signature_applied", message: "API offline, signature applied from cache" });
+        return { status: "success", detail: `API offline. Cached signature applied (${cache.lastSignatureVersion ?? "unknown"})`, state: "cache_used" };
+      } catch (cacheError) {
+        await reportResult({ email, deviceId: cache.deviceId, status: "error", eventType: "signature_failed", message: (cacheError as Error).message });
+        return { status: "error", detail: (cacheError as Error).message, state: "signature_failed" };
+      }
+    }
+
+    return { status: "error", detail: `API offline ve cache bulunamadi: ${(error as Error).message}`, state: "api_offline" };
+  }
+
   if (!signature.html || signature.html.trim() === "") {
     return { status: "error", detail: "No template assigned", state: "no_template_assigned" };
   }
   const htmlToApply = signature.updateRequired || !cache.lastSignatureHtml ? signature.html : cache.lastSignatureHtml;
   await setSignatureAsync(htmlToApply);
 
-  cache.lastCheckDate = todayIsoDate();
+  cache.lastCheckedAt = new Date().toISOString();
+  const cacheSeconds = Number(signature.cacheSeconds);
+  const intervalMs = Number.isFinite(cacheSeconds) && cacheSeconds > 0
+    ? cacheSeconds * 1000
+    : DEFAULT_SIGNATURE_CHECK_INTERVAL_MS;
+  cache.cacheSeconds = Math.floor(intervalMs / 1000);
+  cache.nextCheckAt = new Date(Date.now() + intervalMs).toISOString();
   cache.lastSignatureVersion = signature.signatureVersion;
+  cache.lastSignatureHash = signature.signatureHash ?? cache.lastSignatureHash;
   cache.lastSignatureHtml = htmlToApply;
   cache.lastUserEmail = email;
   cache.lastSuccessfulApplyAt = new Date().toISOString();
@@ -218,6 +260,7 @@ export async function getTaskpaneState(): Promise<{
     email,
     deviceId: cache.deviceId,
     currentSignatureVersion: cache.lastSignatureVersion,
+    currentSignatureHash: cache.lastSignatureHash,
     lastCheckAt: cache.lastSuccessfulApplyAt,
   });
 

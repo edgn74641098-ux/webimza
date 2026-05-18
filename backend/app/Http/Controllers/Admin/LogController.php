@@ -30,6 +30,20 @@ class LogController extends Controller
             $date = Carbon::parse($request->string('date'));
             $query->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()]);
         }
+        
+        if ($request->filled('q')) {
+            $q = trim((string) $request->string('q'));
+            $query->where(function ($sub) use ($q) {
+                $sub->where('message', 'like', "%{$q}%")
+                    ->orWhere('event_type', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('device_id', 'like', "%{$q}%")
+                    ->orWhereHas('user', function ($userQuery) use ($q) {
+                        $userQuery->where('email', 'like', "%{$q}%")
+                            ->orWhere('name', 'like', "%{$q}%");
+                    });
+            });
+        }
 
         $logs = $query->latest()->paginate(30)->withQueryString();
         $logs->getCollection()->transform(function (AddinLog $log) {
@@ -63,6 +77,7 @@ class LogController extends Controller
                 'event_type',
                 'user_id',
                 'date',
+                'q',
             ]),
             'eventTypes' => AddinLog::query()->select('event_type')->distinct()->orderBy('event_type')->pluck('event_type'),
             'statuses' => AddinLog::query()->select('status')->distinct()->orderBy('status')->pluck('status'),

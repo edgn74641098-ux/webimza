@@ -11,6 +11,7 @@
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
                     <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">Kullanicilar</x-nav-link>
                     <x-nav-link :href="route('admin.templates.index')" :active="request()->routeIs('admin.templates.*')">Imza Sablonlari</x-nav-link>
+                    <x-nav-link :href="route('admin.groups.index')" :active="request()->routeIs('admin.groups.*')">Gruplar</x-nav-link>
                     <x-nav-link :href="route('admin.assignments.index')" :active="request()->routeIs('admin.assignments.*')">Atamalar</x-nav-link>
                     <x-nav-link :href="route('admin.updates.index')" :active="request()->routeIs('admin.updates.*')">Guncelleme Yonetimi</x-nav-link>
                     <x-nav-link :href="route('admin.devices.index')" :active="request()->routeIs('admin.devices.*')">Add-in Cihazlari</x-nav-link>
@@ -75,6 +76,7 @@
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">Kullanicilar</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.templates.index')" :active="request()->routeIs('admin.templates.*')">Imza Sablonlari</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.groups.index')" :active="request()->routeIs('admin.groups.*')">Gruplar</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.assignments.index')" :active="request()->routeIs('admin.assignments.*')">Atamalar</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.updates.index')" :active="request()->routeIs('admin.updates.*')">Guncelleme Yonetimi</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.devices.index')" :active="request()->routeIs('admin.devices.*')">Add-in Cihazlari</x-responsive-nav-link>

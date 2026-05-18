@@ -2,7 +2,7 @@
     <x-slot name="header">
         <x-ui.page-header title="Kullanici Detayi" subtitle="Kullanicinin profil, imza, cihaz ve log gorunumleri.">
             <x-slot name="actions">
-                <a href="{{ route('admin.updates.index', ['scope' => 'user', 'user_id' => $user->id]) }}"><x-ui.button type="button">Guncelleme Baslat</x-ui.button></a>
+                <a href="{{ route('admin.updates.index', ['scope_key' => 'user', 'user_id' => $user->id]) }}"><x-ui.button type="button">Guncelleme Baslat</x-ui.button></a>
                 <a href="{{ route('admin.users.edit', $user) }}"><x-ui.button variant="secondary" type="button">Duzenle</x-ui.button></a>
             </x-slot>
         </x-ui.page-header>

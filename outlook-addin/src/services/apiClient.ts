@@ -40,6 +40,7 @@ export async function checkSignature(payload: {
   email: string;
   deviceId: string;
   currentSignatureVersion?: string;
+  currentSignatureHash?: string;
   lastCheckAt?: string;
 }): Promise<SignatureCheckResponse> {
   return postJson<SignatureCheckResponse>(`${config.apiBaseUrl}/addin/signature/check`, payload);

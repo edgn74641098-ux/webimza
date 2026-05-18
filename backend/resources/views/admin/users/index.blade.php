@@ -73,7 +73,7 @@
                                     </x-slot>
                                     <a href="{{ route('admin.users.show', $user) }}" @click="selectedUserId='{{ (string) $user->id }}'; localStorage.setItem('selectedUserId', selectedUserId)" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Detay</a>
                                     <a href="{{ route('admin.users.edit', $user) }}" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Duzenle</a>
-                                    <a href="{{ route('admin.updates.index', ['scope' => 'user', 'user_id' => $user->id]) }}" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Guncelleme baslat</a>
+                                    <a href="{{ route('admin.updates.index', ['scope_key' => 'user', 'user_id' => $user->id]) }}" class="block rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">Guncelleme baslat</a>
                                 </x-ui.dropdown>
                             </td>
                         </tr>

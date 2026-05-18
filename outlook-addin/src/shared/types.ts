@@ -3,6 +3,7 @@ export type SignatureCheckResponse = {
   updateRequired: boolean;
   forceUpdate: boolean;
   signatureVersion: string;
+  signatureHash?: string;
   signatureName: string;
   html: string;
   text: string;
@@ -11,8 +12,11 @@ export type SignatureCheckResponse = {
 
 export type SignatureCache = {
   deviceId: string;
-  lastCheckDate?: string;
+  lastCheckedAt?: string;
+  nextCheckAt?: string;
+  cacheSeconds?: number;
   lastSignatureVersion?: string;
+  lastSignatureHash?: string;
   lastSignatureHtml?: string;
   lastUserEmail?: string;
   lastSuccessfulApplyAt?: string;

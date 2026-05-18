@@ -8,7 +8,7 @@
             Bu islem anlik push degildir. Kullanici Outlook'ta yeni mail olusturdugunda veya add-in kontrol yaptiginda uygulanir.
         </x-ui.alert>
 
-        <x-ui.card title="Yeni Force Update" x-data="{ step: 1, scope: '{{ old('scope_key', 'all') }}' }">
+        <x-ui.card title="Yeni Force Update" x-data="{ step: 1, scope: '{{ old('scope_key', request('scope_key', 'all')) }}' }">
             <form method="POST" action="{{ route('admin.updates.store') }}" class="space-y-4">
                 @csrf
 
@@ -52,7 +52,7 @@
                         <x-ui.select name="user_id">
                             <option value="">Kullanici secin</option>
                             @foreach($users as $user)
-                                <option value="{{ $user->id }}" @selected(old('user_id') == $user->id)>{{ $user->name }} - {{ $user->email }}</option>
+                                <option value="{{ $user->id }}" @selected(old('user_id', request('user_id')) == $user->id)>{{ $user->name }} - {{ $user->email }}</option>
                             @endforeach
                         </x-ui.select>
                     </div>
