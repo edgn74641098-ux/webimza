@@ -7,7 +7,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("UPDATE users SET source = 'manual' WHERE source NOT IN ('manual', 'entra', 'ad_sync', 'addin')");
+        DB::statement("UPDATE users SET source = 'manual' WHERE source IS NULL OR source NOT IN ('manual', 'entra', 'ad_sync', 'addin')");
+        DB::statement('DROP TABLE IF EXISTS users_new');
 
         if (DB::connection()->getDriverName() !== 'sqlite') {
             return;
@@ -49,7 +50,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement("UPDATE users SET source = 'manual' WHERE source = 'addin'");
+        DB::statement("UPDATE users SET source = 'manual' WHERE source IS NULL OR source = 'addin'");
+        DB::statement('DROP TABLE IF EXISTS users_new');
 
         if (DB::connection()->getDriverName() !== 'sqlite') {
             return;
