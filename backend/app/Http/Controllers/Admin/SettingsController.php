@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AddinBuild;
 use App\Models\AddinConfig;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class SettingsController extends Controller
 {
@@ -36,6 +39,130 @@ class SettingsController extends Controller
             'manifestLatestExists' => file_exists(public_path('manifest-latest.xml')),
             'addinPublicPath' => public_path('addin'),
             'addinPublicExists' => is_dir(public_path('addin')),
+            'envSettings' => $this->readEditableEnvValues(),
         ]);
+    }
+
+    public function update(Request $request)
+    {
+        $data = $request->validate([
+            'APP_NAME' => ['required', 'string', 'max:120'],
+            'APP_ENV' => ['required', 'in:local,staging,production'],
+            'APP_DEBUG' => ['required', 'in:true,false'],
+            'APP_URL' => ['required', 'url', 'max:255'],
+            'APP_TIMEZONE' => ['required', 'timezone'],
+            'APP_LOCALE' => ['required', 'string', 'max:12'],
+            'APP_FALLBACK_LOCALE' => ['required', 'string', 'max:12'],
+            'LOG_LEVEL' => ['required', 'in:debug,info,notice,warning,error,critical,alert,emergency'],
+            'CACHE_STORE' => ['required', 'string', 'max:60'],
+            'QUEUE_CONNECTION' => ['required', 'string', 'max:60'],
+            'SESSION_DRIVER' => ['required', 'string', 'max:60'],
+            'SESSION_LIFETIME' => ['required', 'integer', 'min:1', 'max:43200'],
+            'MAIL_MAILER' => ['nullable', 'string', 'max:60'],
+            'MAIL_HOST' => ['nullable', 'string', 'max:255'],
+            'MAIL_PORT' => ['nullable', 'integer', 'min:1', 'max:65535'],
+            'MAIL_USERNAME' => ['nullable', 'string', 'max:255'],
+            'MAIL_FROM_ADDRESS' => ['nullable', 'email', 'max:255'],
+            'MAIL_FROM_NAME' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $this->writeEnvValues($data);
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+
+        return redirect()
+            ->route('admin.settings.index')
+            ->with('success', 'Ayarlar kaydedildi. Yeni konfigürasyon aktif edildi.');
+    }
+
+    private function readEditableEnvValues(): array
+    {
+        $values = $this->parseEnvFile();
+
+        return [
+            'APP_NAME' => $values['APP_NAME'] ?? config('app.name', 'Laravel'),
+            'APP_ENV' => $values['APP_ENV'] ?? config('app.env', 'production'),
+            'APP_DEBUG' => $values['APP_DEBUG'] ?? (config('app.debug') ? 'true' : 'false'),
+            'APP_URL' => $values['APP_URL'] ?? config('app.url', 'http://localhost'),
+            'APP_TIMEZONE' => $values['APP_TIMEZONE'] ?? config('app.timezone', 'Europe/Istanbul'),
+            'APP_LOCALE' => $values['APP_LOCALE'] ?? config('app.locale', 'en'),
+            'APP_FALLBACK_LOCALE' => $values['APP_FALLBACK_LOCALE'] ?? config('app.fallback_locale', 'en'),
+            'LOG_LEVEL' => $values['LOG_LEVEL'] ?? config('logging.level', 'debug'),
+            'CACHE_STORE' => $values['CACHE_STORE'] ?? config('cache.default', 'database'),
+            'QUEUE_CONNECTION' => $values['QUEUE_CONNECTION'] ?? config('queue.default', 'database'),
+            'SESSION_DRIVER' => $values['SESSION_DRIVER'] ?? config('session.driver', 'database'),
+            'SESSION_LIFETIME' => $values['SESSION_LIFETIME'] ?? config('session.lifetime', 120),
+            'MAIL_MAILER' => $values['MAIL_MAILER'] ?? config('mail.default', 'log'),
+            'MAIL_HOST' => $values['MAIL_HOST'] ?? config('mail.mailers.smtp.host', ''),
+            'MAIL_PORT' => $values['MAIL_PORT'] ?? config('mail.mailers.smtp.port', ''),
+            'MAIL_USERNAME' => $values['MAIL_USERNAME'] ?? config('mail.mailers.smtp.username', ''),
+            'MAIL_FROM_ADDRESS' => $values['MAIL_FROM_ADDRESS'] ?? config('mail.from.address', ''),
+            'MAIL_FROM_NAME' => $values['MAIL_FROM_NAME'] ?? config('mail.from.name', ''),
+        ];
+    }
+
+    private function parseEnvFile(): array
+    {
+        $path = base_path('.env');
+        if (! File::exists($path)) {
+            return [];
+        }
+
+        $values = [];
+        foreach (preg_split('/\r\n|\r|\n/', (string) File::get($path)) as $line) {
+            $line = trim($line);
+            if ($line === '' || str_starts_with($line, '#') || ! str_contains($line, '=')) {
+                continue;
+            }
+
+            [$key, $value] = explode('=', $line, 2);
+            $values[trim($key)] = $this->unquoteEnvValue(trim($value));
+        }
+
+        return $values;
+    }
+
+    private function writeEnvValues(array $values): void
+    {
+        $path = base_path('.env');
+        $content = File::exists($path) ? (string) File::get($path) : '';
+        if (File::exists($path)) {
+            $backupDir = storage_path('app/env-backups');
+            File::ensureDirectoryExists($backupDir);
+            File::copy($path, $backupDir.'/env-'.now()->format('Ymd-His').'.backup');
+        }
+
+        foreach ($values as $key => $value) {
+            $line = $key.'='.$this->formatEnvValue((string) $value);
+            if (preg_match('/^'.preg_quote($key, '/').'=.*/m', $content)) {
+                $content = preg_replace('/^'.preg_quote($key, '/').'=.*/m', $line, $content);
+            } else {
+                $content = rtrim($content).PHP_EOL.$line.PHP_EOL;
+            }
+        }
+
+        File::put($path, rtrim($content).PHP_EOL);
+    }
+
+    private function unquoteEnvValue(string $value): string
+    {
+        if (strlen($value) >= 2 && str_starts_with($value, '"') && str_ends_with($value, '"')) {
+            return str_replace(['\\"', '\\\\'], ['"', '\\'], substr($value, 1, -1));
+        }
+
+        return $value;
+    }
+
+    private function formatEnvValue(string $value): string
+    {
+        if ($value === 'true' || $value === 'false' || is_numeric($value)) {
+            return $value;
+        }
+
+        if ($value === '' || preg_match('/\s|#|"|\\\\/', $value)) {
+            return '"'.str_replace(['\\', '"'], ['\\\\', '\\"'], $value).'"';
+        }
+
+        return $value;
     }
 }

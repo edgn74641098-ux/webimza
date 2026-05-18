@@ -9,6 +9,130 @@
     </x-slot>
 
     <x-ui.app-shell>
+        @if(session('success'))
+            <x-ui.alert type="success">{{ session('success') }}</x-ui.alert>
+        @endif
+        @if($errors->any())
+            <x-ui.alert type="error">Ayarlar kaydedilemedi. Lutfen form alanlarini kontrol edin.</x-ui.alert>
+        @endif
+
+        <x-ui.card title="Duzenlenebilir Sistem Ayarlari" subtitle="Bu alanlar backend/.env dosyasina yazilir ve config cache otomatik temizlenir.">
+            <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-5">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <h3 class="mb-3 text-sm font-semibold text-slate-900">Uygulama</h3>
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_NAME</label>
+                            <x-ui.input name="APP_NAME" :value="old('APP_NAME', $envSettings['APP_NAME'])" required />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_ENV</label>
+                            <x-ui.select name="APP_ENV" required>
+                                @foreach(['production', 'staging', 'local'] as $option)
+                                    <option value="{{ $option }}" @selected(old('APP_ENV', $envSettings['APP_ENV']) === $option)>{{ $option }}</option>
+                                @endforeach
+                            </x-ui.select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_DEBUG</label>
+                            <x-ui.select name="APP_DEBUG" required>
+                                <option value="false" @selected(old('APP_DEBUG', $envSettings['APP_DEBUG']) === 'false')>false</option>
+                                <option value="true" @selected(old('APP_DEBUG', $envSettings['APP_DEBUG']) === 'true')>true</option>
+                            </x-ui.select>
+                        </div>
+                        <div class="xl:col-span-2">
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_URL</label>
+                            <x-ui.input name="APP_URL" type="url" :value="old('APP_URL', $envSettings['APP_URL'])" required />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_TIMEZONE</label>
+                            <x-ui.select name="APP_TIMEZONE" required>
+                                @foreach(['Europe/Istanbul', 'UTC', 'Europe/London', 'Europe/Berlin', 'America/New_York'] as $option)
+                                    <option value="{{ $option }}" @selected(old('APP_TIMEZONE', $envSettings['APP_TIMEZONE']) === $option)>{{ $option }}</option>
+                                @endforeach
+                            </x-ui.select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_LOCALE</label>
+                            <x-ui.input name="APP_LOCALE" :value="old('APP_LOCALE', $envSettings['APP_LOCALE'])" required />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">APP_FALLBACK_LOCALE</label>
+                            <x-ui.input name="APP_FALLBACK_LOCALE" :value="old('APP_FALLBACK_LOCALE', $envSettings['APP_FALLBACK_LOCALE'])" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="mb-3 text-sm font-semibold text-slate-900">Calisma Ayarlari</h3>
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">LOG_LEVEL</label>
+                            <x-ui.select name="LOG_LEVEL" required>
+                                @foreach(['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'] as $option)
+                                    <option value="{{ $option }}" @selected(old('LOG_LEVEL', $envSettings['LOG_LEVEL']) === $option)>{{ $option }}</option>
+                                @endforeach
+                            </x-ui.select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">CACHE_STORE</label>
+                            <x-ui.input name="CACHE_STORE" :value="old('CACHE_STORE', $envSettings['CACHE_STORE'])" required />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">QUEUE_CONNECTION</label>
+                            <x-ui.input name="QUEUE_CONNECTION" :value="old('QUEUE_CONNECTION', $envSettings['QUEUE_CONNECTION'])" required />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">SESSION_DRIVER</label>
+                            <x-ui.input name="SESSION_DRIVER" :value="old('SESSION_DRIVER', $envSettings['SESSION_DRIVER'])" required />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">SESSION_LIFETIME</label>
+                            <x-ui.input name="SESSION_LIFETIME" type="number" min="1" :value="old('SESSION_LIFETIME', $envSettings['SESSION_LIFETIME'])" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="mb-3 text-sm font-semibold text-slate-900">Mail Ayarlari</h3>
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">MAIL_MAILER</label>
+                            <x-ui.input name="MAIL_MAILER" :value="old('MAIL_MAILER', $envSettings['MAIL_MAILER'])" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">MAIL_HOST</label>
+                            <x-ui.input name="MAIL_HOST" :value="old('MAIL_HOST', $envSettings['MAIL_HOST'])" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">MAIL_PORT</label>
+                            <x-ui.input name="MAIL_PORT" type="number" min="1" max="65535" :value="old('MAIL_PORT', $envSettings['MAIL_PORT'])" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">MAIL_USERNAME</label>
+                            <x-ui.input name="MAIL_USERNAME" :value="old('MAIL_USERNAME', $envSettings['MAIL_USERNAME'])" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">MAIL_FROM_ADDRESS</label>
+                            <x-ui.input name="MAIL_FROM_ADDRESS" type="email" :value="old('MAIL_FROM_ADDRESS', $envSettings['MAIL_FROM_ADDRESS'])" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700">MAIL_FROM_NAME</label>
+                            <x-ui.input name="MAIL_FROM_NAME" :value="old('MAIL_FROM_NAME', $envSettings['MAIL_FROM_NAME'])" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs text-slate-500">DB sifreleri ve APP_KEY gibi hassas anahtarlar guvenlik icin bu formdan duzenlenmez.</p>
+                    <x-ui.button type="submit">Ayarlari Kaydet</x-ui.button>
+                </div>
+            </form>
+        </x-ui.card>
+
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
             <x-ui.card title="Saat ve Zaman Dilimi" subtitle="Paneldeki tarih/saat gosterimleri bu ayara gore hesaplanir.">
                 <div class="space-y-3 text-sm">

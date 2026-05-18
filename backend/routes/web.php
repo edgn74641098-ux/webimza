@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/deployment/builds/{build}/manifest', [AddinConfigController::class, 'downloadManifest'])->name('admin.deployment.manifest');
     Route::get('/admin/deployment/builds/{build}/package', [AddinConfigController::class, 'downloadPackage'])->name('admin.deployment.package');
     Route::get('/admin/settings', [SettingsController::class, 'index'])->name('admin.settings.index');
+    Route::put('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
     Route::resource('/admin/groups', GroupController::class)->except(['show'])->names('admin.groups');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
