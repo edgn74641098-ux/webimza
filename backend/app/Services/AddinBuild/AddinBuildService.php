@@ -87,6 +87,7 @@ class AddinBuildService
         $providerName = $config->provider_name ?: 'TRINOX';
         $displayName = $config->display_name ?: 'TRINOX Signature Manager';
         $version = $config->manifest_version ?: '1.1.0.0';
+        $description = $this->buildDescription($version, $buildType);
         $appDomain = $origin;
 
         $launchEventBlock = '';
@@ -105,7 +106,7 @@ class AddinBuildService
   <ProviderName>{$this->xml($providerName)}</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue=\"{$this->xml($displayName)}\"/>
-  <Description DefaultValue=\"TRINOX centralized signature manager\"/>
+  <Description DefaultValue=\"{$this->xml($description)}\"/>
   <IconUrl DefaultValue=\"{$this->xml($icon)}\"/>
   <HighResolutionIconUrl DefaultValue=\"{$this->xml($high)}\"/>
   <SupportUrl DefaultValue=\"{$this->xml($supportUrl)}\"/>
@@ -156,7 +157,7 @@ class AddinBuildService
       <bt:Images><bt:Image id=\"Icon.16\" DefaultValue=\"{$this->xml($icon16)}\"/><bt:Image id=\"Icon.32\" DefaultValue=\"{$this->xml($icon)}\"/><bt:Image id=\"Icon.80\" DefaultValue=\"{$this->xml($icon80)}\"/></bt:Images>
       <bt:Urls><bt:Url id=\"Taskpane.Url\" DefaultValue=\"{$this->xml($taskpaneUrl)}\"/><bt:Url id=\"Autorun.Url\" DefaultValue=\"{$this->xml($autorunUrl)}\"/></bt:Urls>
       <bt:ShortStrings><bt:String id=\"Group.Label\" DefaultValue=\"TRINOX\"/><bt:String id=\"Button.Label\" DefaultValue=\"Signature\"/></bt:ShortStrings>
-      <bt:LongStrings><bt:String id=\"Button.Tooltip\" DefaultValue=\"Open TRINOX Signature Manager\"/></bt:LongStrings>
+      <bt:LongStrings><bt:String id=\"Button.Tooltip\" DefaultValue=\"{$this->xml($description)}\"/></bt:LongStrings>
     </Resources>
     </VersionOverrides>
   </VersionOverrides>
@@ -173,6 +174,14 @@ class AddinBuildService
         $parts[3]++;
 
         return implode('.', $parts);
+    }
+
+    private function buildDescription(string $version, string $buildType): string
+    {
+        $label = $buildType === 'automatic_event' ? 'Automatic Outlook compose' : 'Manual Outlook test';
+        $builtAt = now()->timezone('Europe/Istanbul')->format('Y-m-d H:i T');
+
+        return "TRINOX centralized email signature manager. Features: auto apply on new mail, manual refresh, API status check, diagnostics. Version {$version}; build: {$label}; created: {$builtAt}.";
     }
 
     private function publishLatestBuild(string $manifestContent, string $distPath): void
