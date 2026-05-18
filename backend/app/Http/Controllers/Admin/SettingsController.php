@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AddinBuild;
 use App\Models\AddinConfig;
+use App\Services\MicrosoftGraph\GraphDirectorySyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Throwable;
 
 class SettingsController extends Controller
 {
@@ -40,6 +42,10 @@ class SettingsController extends Controller
             'addinPublicPath' => public_path('addin'),
             'addinPublicExists' => is_dir(public_path('addin')),
             'envSettings' => $this->readEditableEnvValues(),
+            'graphSyncEnabled' => (bool) config('services.microsoft_graph.sync_enabled'),
+            'graphSyncConfigured' => filled(config('services.microsoft_graph.tenant_id'))
+                && filled(config('services.microsoft_graph.client_id'))
+                && filled(config('services.microsoft_graph.client_secret')),
         ]);
     }
 
@@ -64,7 +70,17 @@ class SettingsController extends Controller
             'MAIL_USERNAME' => ['nullable', 'string', 'max:255'],
             'MAIL_FROM_ADDRESS' => ['nullable', 'email', 'max:255'],
             'MAIL_FROM_NAME' => ['nullable', 'string', 'max:255'],
+            'ENTRA_SYNC_ENABLED' => ['required', 'in:true,false'],
+            'ENTRA_TENANT_ID' => ['nullable', 'string', 'max:255'],
+            'ENTRA_CLIENT_ID' => ['nullable', 'string', 'max:255'],
+            'ENTRA_CLIENT_SECRET' => ['nullable', 'string', 'max:2048'],
+            'ENTRA_SYNC_GROUPS' => ['required', 'in:true,false'],
+            'ENTRA_GROUP_PREFIX' => ['nullable', 'string', 'max:120'],
         ]);
+
+        if (blank($data['ENTRA_CLIENT_SECRET'] ?? null)) {
+            unset($data['ENTRA_CLIENT_SECRET']);
+        }
 
         $this->writeEnvValues($data);
         Artisan::call('config:clear');
@@ -73,6 +89,30 @@ class SettingsController extends Controller
         return redirect()
             ->route('admin.settings.index')
             ->with('success', 'Ayarlar kaydedildi. Yeni konfigürasyon aktif edildi.');
+    }
+
+    public function syncEntraDirectory(GraphDirectorySyncService $syncService)
+    {
+        try {
+            $summary = $syncService->sync();
+        } catch (Throwable $exception) {
+            return redirect()
+                ->route('admin.settings.index')
+                ->withErrors(['entra_sync' => $exception->getMessage()]);
+        }
+
+        return redirect()
+            ->route('admin.settings.index')
+            ->with('success', sprintf(
+                'Microsoft 365 senkronizasyonu tamamlandi. Kullanici: %d yeni / %d guncel / %d atlandi, departman: %d, grup: %d yeni / %d guncel, uyelik: %d.',
+                $summary['users_created'],
+                $summary['users_updated'],
+                $summary['users_skipped'],
+                $summary['departments_created'],
+                $summary['groups_created'],
+                $summary['groups_updated'],
+                $summary['memberships_synced'],
+            ));
     }
 
     private function readEditableEnvValues(): array
@@ -98,6 +138,13 @@ class SettingsController extends Controller
             'MAIL_USERNAME' => $values['MAIL_USERNAME'] ?? config('mail.mailers.smtp.username', ''),
             'MAIL_FROM_ADDRESS' => $values['MAIL_FROM_ADDRESS'] ?? config('mail.from.address', ''),
             'MAIL_FROM_NAME' => $values['MAIL_FROM_NAME'] ?? config('mail.from.name', ''),
+            'ENTRA_SYNC_ENABLED' => $values['ENTRA_SYNC_ENABLED'] ?? (config('services.microsoft_graph.sync_enabled') ? 'true' : 'false'),
+            'ENTRA_TENANT_ID' => $values['ENTRA_TENANT_ID'] ?? config('services.microsoft_graph.tenant_id', ''),
+            'ENTRA_CLIENT_ID' => $values['ENTRA_CLIENT_ID'] ?? config('services.microsoft_graph.client_id', ''),
+            'ENTRA_CLIENT_SECRET' => '',
+            'ENTRA_CLIENT_SECRET_SET' => filled($values['ENTRA_CLIENT_SECRET'] ?? config('services.microsoft_graph.client_secret')),
+            'ENTRA_SYNC_GROUPS' => $values['ENTRA_SYNC_GROUPS'] ?? (config('services.microsoft_graph.sync_groups') ? 'true' : 'false'),
+            'ENTRA_GROUP_PREFIX' => $values['ENTRA_GROUP_PREFIX'] ?? config('services.microsoft_graph.group_prefix', ''),
         ];
     }
 
