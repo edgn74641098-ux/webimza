@@ -242,7 +242,7 @@
                                     <x-ui.badge :status="$graphSyncConfigured ? 'active' : 'warning'">{{ $graphSyncConfigured ? 'hazir' : 'eksik' }}</x-ui.badge>
                                 </div>
                                 @if($graphSyncConfigured)
-                                    <a href="{{ route('admin.microsoft365.connect') }}" class="ui-btn-primary mt-2 w-full justify-center">
+                                    <a href="{{ route('admin.microsoft365.connect') }}" class="ui-btn-primary mt-2 w-full justify-center" target="_blank" rel="noopener">
                                         Microsoft ile Baglan
                                     </a>
                                 @else
@@ -256,6 +256,7 @@
                                     </a>
                                 @endif
                                 <div class="rounded-md bg-slate-50 p-2 text-[11px] leading-5 text-slate-500">
+                                    Baglanti URL: <a class="break-all font-mono text-blue-800 underline" href="{{ route('admin.microsoft365.connect') }}" target="_blank" rel="noopener">{{ route('admin.microsoft365.connect') }}</a><br>
                                     Redirect URI: <span class="break-all font-mono text-slate-700">{{ route('admin.microsoft365.callback') }}</span>
                                 </div>
                                 <p class="text-xs leading-5 text-slate-500">Kimlik bilgisi kaydedilmez; Microsoft modern auth sonrasi gecici oturumla listeleme yapilir.</p>

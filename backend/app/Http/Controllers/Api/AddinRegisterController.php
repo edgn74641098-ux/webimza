@@ -44,8 +44,7 @@ class AddinRegisterController extends Controller
             'mobile' => $payload['mobile'] ?? null,
             'office' => $payload['office'] ?? null,
             'website' => $payload['website'] ?? null,
-            // users.source enum does not include "addin"; classify add-in discovered users as manual.
-            'source' => 'manual',
+            'source' => 'addin',
             'is_active' => true,
         ]);
 
@@ -60,7 +59,7 @@ class AddinRegisterController extends Controller
             'mobile' => $user->mobile ?: ($payload['mobile'] ?? null),
             'office' => $user->office ?: ($payload['office'] ?? null),
             'website' => $user->website ?: ($payload['website'] ?? null),
-            'source' => $user->source ?: 'manual',
+            'source' => $user->source ?: 'addin',
         ]);
         $user->save();
 
