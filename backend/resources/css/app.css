@@ -46,7 +46,7 @@
   }
 
   .ui-card-body {
-    @apply p-5;
+    @apply min-w-0 p-5;
   }
 
   .ui-kpi {
@@ -98,7 +98,19 @@
   }
 
   .ui-table tbody td {
-    @apply px-4 py-3 align-middle text-slate-700;
+    @apply break-words px-4 py-3 align-middle text-slate-700;
+  }
+
+  .ui-table tbody td > * {
+    min-width: 0;
+  }
+
+  .ui-card-body .grid > div {
+    min-width: 0;
+  }
+
+  .ui-card-body :where(strong, code, .font-mono) {
+    overflow-wrap: anywhere;
   }
 
   .ui-table tbody tr {
