@@ -92,14 +92,12 @@ class AddinBuildService
         $description = $this->buildDescription($version, $buildType);
         $appDomain = $origin;
 
-        $launchEventBlock = '';
-        if ($buildType === 'automatic_event') {
-            $launchEventBlock = "
+        // Enable autorun in both manual and automatic manifests.
+        $launchEventBlock = "
           <ExtensionPoint xsi:type=\"LaunchEvent\">
             <LaunchEvents><LaunchEvent Type=\"OnNewMessageCompose\" FunctionName=\"onNewMessageComposeHandler\" /></LaunchEvents>
             <SourceLocation resid=\"Autorun.Url\"/>
           </ExtensionPoint>";
-        }
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
 <OfficeApp xmlns=\"http://schemas.microsoft.com/office/appforoffice/1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bt=\"http://schemas.microsoft.com/office/officeappbasictypes/1.0\" xmlns:mailappor=\"http://schemas.microsoft.com/office/mailappversionoverrides\" xsi:type=\"MailApp\">
