@@ -25,7 +25,7 @@ class Microsoft365DirectoryController extends Controller
         if (! $this->publicClientConfigured()) {
             return redirect()
                 ->route('admin.settings.index')
-                ->withErrors(['microsoft365' => 'Microsoft 365 baglantisi icin Tenant ID ve Client ID ayarlari gereklidir.']);
+                ->withErrors(['microsoft365' => 'Microsoft 365 modern auth baslatmak icin Azure App Registration Client ID gereklidir.']);
         }
 
         $verifier = Str::random(96);
@@ -174,12 +174,14 @@ class Microsoft365DirectoryController extends Controller
 
     private function publicClientConfigured(): bool
     {
-        return filled(config('services.microsoft_graph.tenant_id')) && filled(config('services.microsoft_graph.client_id'));
+        return filled(config('services.microsoft_graph.client_id'));
     }
 
     private function authorityUrl(): string
     {
-        return 'https://login.microsoftonline.com/'.config('services.microsoft_graph.tenant_id');
+        $tenant = trim((string) config('services.microsoft_graph.tenant_id', 'organizations'));
+
+        return 'https://login.microsoftonline.com/'.($tenant !== '' ? $tenant : 'organizations');
     }
 
     private function sessionToken(Request $request): ?string

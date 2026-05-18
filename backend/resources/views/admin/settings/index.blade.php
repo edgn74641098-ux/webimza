@@ -29,10 +29,10 @@
         'microsoft365' => [
             'label' => 'Microsoft 365',
             'title' => 'Entra / Graph senkronizasyonu',
-            'description' => 'Modern auth ile kullanici, departman, grup ve grup uyeliklerini otomatik ice aktarir.',
+            'description' => 'Modern auth ile Microsoft hesabina yonlendirir; kullanici, departman, grup ve uyelikleri secerek ice aktarir.',
             'fields' => [
-                ['name' => 'ENTRA_TENANT_ID', 'label' => 'Tenant ID veya domain', 'type' => 'text', 'span' => 'lg:col-span-2', 'required' => false],
-                ['name' => 'ENTRA_CLIENT_ID', 'label' => 'Client ID', 'type' => 'text', 'span' => 'lg:col-span-2', 'required' => false],
+                ['name' => 'ENTRA_TENANT_ID', 'label' => 'Tenant', 'type' => 'text', 'span' => 'lg:col-span-2', 'required' => false, 'hint' => 'Bos veya organizations: herhangi bir is/okul hesabi ile giris. Tenant domain/id: sadece o tenant.'],
+                ['name' => 'ENTRA_CLIENT_ID', 'label' => 'Azure App Client ID', 'type' => 'text', 'span' => 'lg:col-span-2', 'required' => false, 'hint' => 'Kullanici sifresi degildir; Microsoft login sayfasini acan uygulama kimligidir.'],
                 ['name' => 'ENTRA_GROUP_PREFIX', 'label' => 'Grup prefix filtresi', 'type' => 'text', 'required' => false, 'hint' => 'Bos kalirsa tum gruplar alinir.'],
             ],
         ],
@@ -238,7 +238,7 @@
                                     <x-ui.badge :status="$graphSessionConnected ? 'active' : 'inactive'">{{ $graphSessionConnected ? 'bagli' : 'kapali' }}</x-ui.badge>
                                 </div>
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="text-sm text-slate-600">Kimlik bilgileri</span>
+                                      <span class="text-sm text-slate-600">Uygulama ayari</span>
                                     <x-ui.badge :status="$graphSyncConfigured ? 'active' : 'warning'">{{ $graphSyncConfigured ? 'hazir' : 'eksik' }}</x-ui.badge>
                                 </div>
                                 @if($graphSyncConfigured)
@@ -247,7 +247,7 @@
                                     </a>
                                 @else
                                     <div class="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-                                        Baglanmak icin once Tenant ID ve Client ID alanlarini doldurup ayarlari kaydedin.
+                                        Microsoft login ekranini acmak icin sadece Azure App Client ID gereklidir. Kullanici adi/sifre burada kaydedilmez; Microsoft sayfasinda sorulur.
                                     </div>
                                 @endif
                                 @if($graphSessionConnected)
@@ -259,7 +259,7 @@
                                     Baglanti URL: <a class="break-all font-mono text-blue-800 underline" href="{{ route('admin.microsoft365.connect') }}" target="_blank" rel="noopener">{{ route('admin.microsoft365.connect') }}</a><br>
                                     Redirect URI: <span class="break-all font-mono text-slate-700">{{ route('admin.microsoft365.callback') }}</span>
                                 </div>
-                                <p class="text-xs leading-5 text-slate-500">Kimlik bilgisi kaydedilmez; Microsoft modern auth sonrasi gecici oturumla listeleme yapilir.</p>
+                                <p class="text-xs leading-5 text-slate-500">Kullanici adi/sifre kaydedilmez; Microsoft modern auth sonrasi gecici oturumla listeleme yapilir.</p>
                             </div>
                         </section>
 

@@ -43,8 +43,7 @@ class SettingsController extends Controller
             'addinPublicExists' => is_dir(public_path('addin')),
             'envSettings' => $this->readEditableEnvValues(),
             'graphSyncEnabled' => (bool) config('services.microsoft_graph.sync_enabled'),
-            'graphSyncConfigured' => filled(config('services.microsoft_graph.tenant_id'))
-                && filled(config('services.microsoft_graph.client_id')),
+            'graphSyncConfigured' => filled(config('services.microsoft_graph.client_id')),
             'graphSessionConnected' => session()->has('graph_access_token')
                 && (int) session('graph_expires_at', 0) > now()->timestamp,
         ]);
@@ -140,7 +139,7 @@ class SettingsController extends Controller
             'MAIL_FROM_ADDRESS' => $values['MAIL_FROM_ADDRESS'] ?? config('mail.from.address', ''),
             'MAIL_FROM_NAME' => $values['MAIL_FROM_NAME'] ?? config('mail.from.name', ''),
             'ENTRA_SYNC_ENABLED' => $values['ENTRA_SYNC_ENABLED'] ?? (config('services.microsoft_graph.sync_enabled') ? 'true' : 'false'),
-            'ENTRA_TENANT_ID' => $values['ENTRA_TENANT_ID'] ?? config('services.microsoft_graph.tenant_id', ''),
+            'ENTRA_TENANT_ID' => $values['ENTRA_TENANT_ID'] ?? config('services.microsoft_graph.tenant_id', 'organizations'),
             'ENTRA_CLIENT_ID' => $values['ENTRA_CLIENT_ID'] ?? config('services.microsoft_graph.client_id', ''),
             'ENTRA_CLIENT_SECRET' => '',
             'ENTRA_CLIENT_SECRET_SET' => filled($values['ENTRA_CLIENT_SECRET'] ?? config('services.microsoft_graph.client_secret')),

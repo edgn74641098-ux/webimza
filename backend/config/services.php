@@ -37,7 +37,7 @@ return [
 
     'microsoft_graph' => [
         'sync_enabled' => filter_var(env('ENTRA_SYNC_ENABLED', false), FILTER_VALIDATE_BOOL),
-        'tenant_id' => env('ENTRA_TENANT_ID'),
+        'tenant_id' => env('ENTRA_TENANT_ID', 'organizations'),
         'client_id' => env('ENTRA_CLIENT_ID'),
         'client_secret' => env('ENTRA_CLIENT_SECRET'),
         'sync_groups' => filter_var(env('ENTRA_SYNC_GROUPS', true), FILTER_VALIDATE_BOOL),
