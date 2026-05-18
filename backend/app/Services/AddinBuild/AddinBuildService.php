@@ -51,6 +51,7 @@ class AddinBuildService
                 throw new \RuntimeException("Add-in dist klasoru bulunamadi: {$distPath}. Once outlook-addin klasorunde npm run build calistirin.");
             }
             $this->addFolderToZip($zip, $distPath, 'dist');
+            $this->publishLatestBuild($manifestContent, $distPath);
 
             $zip->close();
             $config->save();
@@ -172,6 +173,13 @@ class AddinBuildService
         $parts[3]++;
 
         return implode('.', $parts);
+    }
+
+    private function publishLatestBuild(string $manifestContent, string $distPath): void
+    {
+        File::put(public_path('manifest-latest.xml'), $manifestContent);
+        File::ensureDirectoryExists(public_path('addin'));
+        File::copyDirectory($distPath, public_path('addin'));
     }
 
     private function buildAppDomain(string $url): string

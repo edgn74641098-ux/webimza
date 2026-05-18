@@ -5,7 +5,7 @@ declare const Office: any;
 async function onNewMessageComposeHandler(event: any) {
   try {
     await reportAutorunTelemetry("triggered");
-    const result = await applySignatureFlow();
+    const result = await applySignatureFlow(true);
     await reportAutorunTelemetry("completed", result.state);
   } catch (error) {
     await reportAutorunTelemetry("failed", (error as Error)?.message ?? "unknown_error");
