@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DeviceController;
 use App\Http\Controllers\Admin\ForceUpdateController;
 use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\Admin\Microsoft365DirectoryController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TemplateController;
 use App\Http\Controllers\Admin\UserController;
@@ -45,6 +46,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/settings', [SettingsController::class, 'index'])->name('admin.settings.index');
     Route::put('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
     Route::post('/admin/settings/entra-sync', [SettingsController::class, 'syncEntraDirectory'])->name('admin.settings.entra-sync');
+    Route::get('/admin/microsoft365/connect', [Microsoft365DirectoryController::class, 'connect'])->name('admin.microsoft365.connect');
+    Route::get('/admin/microsoft365/callback', [Microsoft365DirectoryController::class, 'callback'])->name('admin.microsoft365.callback');
+    Route::get('/admin/microsoft365/directory', [Microsoft365DirectoryController::class, 'directory'])->name('admin.microsoft365.directory');
+    Route::post('/admin/microsoft365/import', [Microsoft365DirectoryController::class, 'import'])->name('admin.microsoft365.import');
+    Route::post('/admin/microsoft365/disconnect', [Microsoft365DirectoryController::class, 'disconnect'])->name('admin.microsoft365.disconnect');
     Route::resource('/admin/groups', GroupController::class)->except(['show'])->names('admin.groups');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

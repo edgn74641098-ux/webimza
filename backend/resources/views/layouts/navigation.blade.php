@@ -2,11 +2,12 @@
     $navGroups = [
         [
             'label' => 'Operasyon',
-            'active' => request()->routeIs('admin.dashboard') || request()->routeIs('admin.users.*') || request()->routeIs('admin.groups.*'),
+            'active' => request()->routeIs('admin.dashboard') || request()->routeIs('admin.users.*') || request()->routeIs('admin.groups.*') || request()->routeIs('admin.microsoft365.*'),
             'items' => [
                 ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'active' => request()->routeIs('admin.dashboard')],
                 ['label' => 'Kullanicilar', 'route' => 'admin.users.index', 'active' => request()->routeIs('admin.users.*')],
                 ['label' => 'Gruplar', 'route' => 'admin.groups.index', 'active' => request()->routeIs('admin.groups.*')],
+                ['label' => 'Microsoft 365 Import', 'route' => 'admin.microsoft365.directory', 'active' => request()->routeIs('admin.microsoft365.*')],
             ],
         ],
         [

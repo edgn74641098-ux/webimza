@@ -44,8 +44,9 @@ class SettingsController extends Controller
             'envSettings' => $this->readEditableEnvValues(),
             'graphSyncEnabled' => (bool) config('services.microsoft_graph.sync_enabled'),
             'graphSyncConfigured' => filled(config('services.microsoft_graph.tenant_id'))
-                && filled(config('services.microsoft_graph.client_id'))
-                && filled(config('services.microsoft_graph.client_secret')),
+                && filled(config('services.microsoft_graph.client_id')),
+            'graphSessionConnected' => session()->has('graph_access_token')
+                && (int) session('graph_expires_at', 0) > now()->timestamp,
         ]);
     }
 
@@ -70,11 +71,11 @@ class SettingsController extends Controller
             'MAIL_USERNAME' => ['nullable', 'string', 'max:255'],
             'MAIL_FROM_ADDRESS' => ['nullable', 'email', 'max:255'],
             'MAIL_FROM_NAME' => ['nullable', 'string', 'max:255'],
-            'ENTRA_SYNC_ENABLED' => ['required', 'in:true,false'],
+            'ENTRA_SYNC_ENABLED' => ['nullable', 'in:true,false'],
             'ENTRA_TENANT_ID' => ['nullable', 'string', 'max:255'],
             'ENTRA_CLIENT_ID' => ['nullable', 'string', 'max:255'],
             'ENTRA_CLIENT_SECRET' => ['nullable', 'string', 'max:2048'],
-            'ENTRA_SYNC_GROUPS' => ['required', 'in:true,false'],
+            'ENTRA_SYNC_GROUPS' => ['nullable', 'in:true,false'],
             'ENTRA_GROUP_PREFIX' => ['nullable', 'string', 'max:120'],
         ]);
 

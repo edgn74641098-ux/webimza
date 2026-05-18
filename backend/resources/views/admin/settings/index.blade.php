@@ -31,11 +31,8 @@
             'title' => 'Entra / Graph senkronizasyonu',
             'description' => 'Modern auth ile kullanici, departman, grup ve grup uyeliklerini otomatik ice aktarir.',
             'fields' => [
-                ['name' => 'ENTRA_SYNC_ENABLED', 'label' => 'Senkronizasyon', 'type' => 'select', 'options' => ['false', 'true'], 'required' => true],
-                ['name' => 'ENTRA_SYNC_GROUPS', 'label' => 'Gruplari senkronize et', 'type' => 'select', 'options' => ['true', 'false'], 'required' => true],
                 ['name' => 'ENTRA_TENANT_ID', 'label' => 'Tenant ID veya domain', 'type' => 'text', 'span' => 'lg:col-span-2', 'required' => false],
                 ['name' => 'ENTRA_CLIENT_ID', 'label' => 'Client ID', 'type' => 'text', 'span' => 'lg:col-span-2', 'required' => false],
-                ['name' => 'ENTRA_CLIENT_SECRET', 'label' => 'Client secret', 'type' => 'password', 'span' => 'lg:col-span-2', 'required' => false, 'hint' => 'Guncellemek istemiyorsaniz bos birakin.'],
                 ['name' => 'ENTRA_GROUP_PREFIX', 'label' => 'Grup prefix filtresi', 'type' => 'text', 'required' => false, 'hint' => 'Bos kalirsa tum gruplar alinir.'],
             ],
         ],
@@ -84,6 +81,9 @@
         @error('entra_sync')
             <x-ui.alert type="error">{{ $message }}</x-ui.alert>
         @enderror
+        @error('microsoft365')
+            <x-ui.alert type="error">{{ $message }}</x-ui.alert>
+        @enderror
 
         <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div class="grid grid-cols-1 divide-y divide-slate-200 lg:grid-cols-[240px_minmax(0,1fr)_320px] lg:divide-x lg:divide-y-0">
@@ -103,7 +103,7 @@
                     </nav>
 
                     <div class="mt-6 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-                        APP_KEY, database sifreleri ve servis secret degerleri bu ekrandan degistirilmez.
+                        APP_KEY, database sifreleri, kullanici sifreleri ve Microsoft secret degerleri bu ekrandan kaydedilmez.
                     </div>
                 </aside>
 
@@ -153,9 +153,6 @@
                                                 @endif
                                                 @if(! empty($field['hint']))
                                                     <p class="mt-1 text-xs text-slate-500">{{ $field['hint'] }}</p>
-                                                @endif
-                                                @if($name === 'ENTRA_CLIENT_SECRET' && ($envSettings['ENTRA_CLIENT_SECRET_SET'] ?? false))
-                                                    <p class="mt-1 text-xs text-emerald-700">Kayitli secret var. Yeni deger girmezseniz korunur.</p>
                                                 @endif
                                                 <div class="mt-1 font-mono text-[11px] text-slate-400">{{ $name }}</div>
                                                 @error($name)
@@ -237,20 +234,27 @@
                             <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Microsoft 365 Sync</p>
                             <div class="space-y-2 rounded-md border border-slate-200 bg-white p-3">
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="text-sm text-slate-600">Graph sync</span>
-                                    <x-ui.badge :status="$graphSyncEnabled ? 'active' : 'inactive'">{{ $graphSyncEnabled ? 'acik' : 'kapali' }}</x-ui.badge>
+                                    <span class="text-sm text-slate-600">Modern auth oturumu</span>
+                                    <x-ui.badge :status="$graphSessionConnected ? 'active' : 'inactive'">{{ $graphSessionConnected ? 'bagli' : 'kapali' }}</x-ui.badge>
                                 </div>
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="text-sm text-slate-600">Kimlik bilgileri</span>
                                     <x-ui.badge :status="$graphSyncConfigured ? 'active' : 'warning'">{{ $graphSyncConfigured ? 'hazir' : 'eksik' }}</x-ui.badge>
                                 </div>
-                                <form method="POST" action="{{ route('admin.settings.entra-sync') }}">
-                                    @csrf
-                                    <x-ui.button class="mt-2 w-full" type="submit" :disabled="! $graphSyncEnabled || ! $graphSyncConfigured">
-                                        Simdi Senkronize Et
+                                <a href="{{ route('admin.microsoft365.connect') }}">
+                                    <x-ui.button class="mt-2 w-full" type="button" :disabled="! $graphSyncConfigured">
+                                        Microsoft ile Baglan
                                     </x-ui.button>
-                                </form>
-                                <p class="text-xs leading-5 text-slate-500">Saatlik otomatik sync, sunucuda Laravel scheduler calisiyorsa devreye girer.</p>
+                                </a>
+                                @if($graphSessionConnected)
+                                    <a href="{{ route('admin.microsoft365.directory') }}">
+                                        <x-ui.button class="mt-2 w-full" variant="secondary" type="button">Kullanicilari ve Gruplari Sec</x-ui.button>
+                                    </a>
+                                @endif
+                                <div class="rounded-md bg-slate-50 p-2 text-[11px] leading-5 text-slate-500">
+                                    Redirect URI: <span class="break-all font-mono text-slate-700">{{ route('admin.microsoft365.callback') }}</span>
+                                </div>
+                                <p class="text-xs leading-5 text-slate-500">Kimlik bilgisi kaydedilmez; Microsoft modern auth sonrasi gecici oturumla listeleme yapilir.</p>
                             </div>
                         </section>
 

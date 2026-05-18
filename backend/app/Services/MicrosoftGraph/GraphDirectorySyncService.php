@@ -65,6 +65,102 @@ class GraphDirectorySyncService
         return $summary;
     }
 
+    public function preview(string $token): array
+    {
+        return [
+            'users' => collect($this->fetchUsers($token))
+                ->filter(fn (array $user) => filled(($user['mail'] ?? null) ?: ($user['userPrincipalName'] ?? null)))
+                ->map(fn (array $user) => [
+                    'id' => $user['id'] ?? '',
+                    'name' => $user['displayName'] ?? '',
+                    'email' => Str::lower((string) (($user['mail'] ?? null) ?: ($user['userPrincipalName'] ?? ''))),
+                    'department' => $user['department'] ?? '',
+                    'title' => $user['jobTitle'] ?? '',
+                    'company' => $user['companyName'] ?? '',
+                    'enabled' => (bool) ($user['accountEnabled'] ?? true),
+                ])
+                ->sortBy('name')
+                ->values()
+                ->all(),
+            'groups' => collect($this->fetchGroups($token))
+                ->map(fn (array $group) => [
+                    'id' => $group['id'] ?? '',
+                    'name' => $group['displayName'] ?? '',
+                    'code' => $this->groupCode($group),
+                    'description' => $group['description'] ?? '',
+                    'mail_enabled' => (bool) ($group['mailEnabled'] ?? false),
+                    'security_enabled' => (bool) ($group['securityEnabled'] ?? false),
+                ])
+                ->sortBy('name')
+                ->values()
+                ->all(),
+        ];
+    }
+
+    public function importSelected(string $token, array $selectedUserIds, array $selectedGroupIds): array
+    {
+        $selectedUserIds = array_values(array_filter($selectedUserIds));
+        $selectedGroupIds = array_values(array_filter($selectedGroupIds));
+
+        $summary = [
+            'users_created' => 0,
+            'users_updated' => 0,
+            'users_skipped' => 0,
+            'departments_created' => 0,
+            'groups_created' => 0,
+            'groups_updated' => 0,
+            'memberships_synced' => 0,
+        ];
+
+        DB::transaction(function () use ($token, $selectedUserIds, $selectedGroupIds, &$summary) {
+            $users = collect($this->fetchUsers($token))->keyBy('id');
+            $groups = collect($this->fetchGroups($token))->keyBy('id');
+
+            foreach ($selectedUserIds as $userId) {
+                $graphUser = $users->get($userId);
+                if (! $graphUser) {
+                    $summary['users_skipped']++;
+                    continue;
+                }
+
+                $result = $this->upsertUser($graphUser);
+                if ($result['skipped']) {
+                    $summary['users_skipped']++;
+                    continue;
+                }
+
+                $summary[$result['created'] ? 'users_created' : 'users_updated']++;
+                $summary['departments_created'] += $result['department_created'] ? 1 : 0;
+            }
+
+            foreach ($selectedGroupIds as $groupId) {
+                $graphGroup = $groups->get($groupId);
+                if (! $graphGroup) {
+                    continue;
+                }
+
+                $group = $this->upsertGroup($graphGroup);
+                $summary[$group->wasRecentlyCreated ? 'groups_created' : 'groups_updated']++;
+
+                $members = $this->fetchGroupUserMembers($token, (string) $groupId);
+                foreach ($members as $member) {
+                    $result = $this->upsertUser($member);
+                    if ($result['skipped']) {
+                        $summary['users_skipped']++;
+                        continue;
+                    }
+
+                    $summary[$result['created'] ? 'users_created' : 'users_updated']++;
+                    $summary['departments_created'] += $result['department_created'] ? 1 : 0;
+                }
+
+                $summary['memberships_synced'] += $this->syncGroupMembersFromPayload($members, $group);
+            }
+        });
+
+        return $summary;
+    }
+
     private function ensureConfigured(): void
     {
         if (! config('services.microsoft_graph.sync_enabled')) {
@@ -242,11 +338,38 @@ class GraphDirectorySyncService
             return 0;
         }
 
-        $members = $this->paginate($token, self::GRAPH_BASE_URL."/groups/{$graphGroupId}/members/microsoft.graph.user", [
-            '$select' => 'id,mail,userPrincipalName',
+        $members = $this->fetchGroupUserMembers($token, (string) $graphGroupId);
+
+        return $this->syncGroupMembersFromPayload($members, $group);
+    }
+
+    private function fetchGroupUserMembers(string $token, string $graphGroupId): array
+    {
+        return $this->paginate($token, self::GRAPH_BASE_URL."/groups/{$graphGroupId}/members/microsoft.graph.user", [
+            '$select' => implode(',', [
+                'id',
+                'displayName',
+                'mail',
+                'userPrincipalName',
+                'jobTitle',
+                'department',
+                'companyName',
+                'businessPhones',
+                'mobilePhone',
+                'officeLocation',
+                'streetAddress',
+                'city',
+                'state',
+                'country',
+                'postalCode',
+                'accountEnabled',
+            ]),
             '$top' => 999,
         ]);
+    }
 
+    private function syncGroupMembersFromPayload(array $members, Group $group): int
+    {
         $emails = collect($members)
             ->map(fn (array $member) => Str::lower((string) (($member['mail'] ?? null) ?: ($member['userPrincipalName'] ?? ''))))
             ->filter(fn (string $email) => $email !== '' && str_contains($email, '@'))
