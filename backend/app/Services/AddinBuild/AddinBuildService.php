@@ -32,7 +32,17 @@ class AddinBuildService
         ]);
 
         try {
-            $manifestContent = $this->renderManifest($config, $buildType);
+            $distPath = $addinPath.DIRECTORY_SEPARATOR.'dist';
+            if (! File::exists($distPath)) {
+                throw new \RuntimeException("Add-in dist klasoru bulunamadi: {$distPath}. Once outlook-addin klasorunde npm run build calistirin.");
+            }
+
+            $autorunScriptPath = $this->findAutorunScriptPath($distPath);
+            if ($buildType === 'automatic_event' && ! $autorunScriptPath) {
+                throw new \RuntimeException('Automatic manifest icin autorun JavaScript dosyasi bulunamadi. Once outlook-addin klasorunde npm run build calistirin.');
+            }
+
+            $manifestContent = $this->renderManifest($config, $buildType, $autorunScriptPath);
             $this->assertValidXml($manifestContent);
             $manifestPath = $storageDir.DIRECTORY_SEPARATOR."manifest-{$buildToken}.xml";
             File::put($manifestPath, $manifestContent);
@@ -46,10 +56,6 @@ class AddinBuildService
 
             $zip->addFile($manifestPath, 'manifest.xml');
 
-            $distPath = $addinPath.DIRECTORY_SEPARATOR.'dist';
-            if (! File::exists($distPath)) {
-                throw new \RuntimeException("Add-in dist klasoru bulunamadi: {$distPath}. Once outlook-addin klasorunde npm run build calistirin.");
-            }
             $this->addFolderToZip($zip, $distPath, 'dist');
             $this->publishLatestBuild($manifestContent, $distPath);
 
@@ -73,7 +79,7 @@ class AddinBuildService
         return $build;
     }
 
-    private function renderManifest(AddinConfig $config, string $buildType): string
+    private function renderManifest(AddinConfig $config, string $buildType, ?string $autorunScriptPath): string
     {
         $id = $config->manifest_id ?: '8c6b669e-4f1d-4fea-8aaf-7dff44f1e4d4';
         $baseTaskpaneUrl = $config->taskpane_url ?: 'https://localhost:5173/index.html';
@@ -82,6 +88,9 @@ class AddinBuildService
         $taskpaneUrl = $this->appendVersionQuery($baseTaskpaneUrl, $version);
         $autorunUrl = $this->appendVersionQuery($baseAutorunUrl, $version);
         $origin = $this->buildAppDomain($baseTaskpaneUrl);
+        $autorunScriptUrl = $autorunScriptPath
+            ? $this->appendVersionQuery($this->buildAssetUrl($origin, $autorunScriptPath), $version)
+            : $autorunUrl;
         $icon16 = $this->buildAssetUrl($origin, 'icon-16.png');
         $icon = $config->icon_url ?: $this->buildAssetUrl($origin, 'icon-32.png');
         $high = $config->highres_icon_url ?: $this->buildAssetUrl($origin, 'icon-64.png');
@@ -93,7 +102,14 @@ class AddinBuildService
         $appDomain = $origin;
 
         $launchEventBlock = '';
+        $runtimeBlock = '';
         if ($buildType === 'automatic_event') {
+            $runtimeBlock = "
+          <Runtimes>
+            <Runtime resid=\"Autorun.Url\" lifetime=\"short\">
+              <Override type=\"javascript\" resid=\"Autorun.Script.Url\"/>
+            </Runtime>
+          </Runtimes>";
             $launchEventBlock = "
           <ExtensionPoint xsi:type=\"LaunchEvent\">
             <LaunchEvents><LaunchEvent Type=\"OnNewMessageCompose\" FunctionName=\"onNewMessageComposeHandler\" /></LaunchEvents>
@@ -134,6 +150,7 @@ class AddinBuildService
     <Hosts>
       <Host xsi:type=\"MailHost\">
         <DesktopFormFactor>
+          {$runtimeBlock}
           <FunctionFile resid=\"Autorun.Url\"/>
           <ExtensionPoint xsi:type=\"MessageComposeCommandSurface\">
             <OfficeTab id=\"TabDefault\">
@@ -157,7 +174,7 @@ class AddinBuildService
     </Hosts>
     <Resources>
       <bt:Images><bt:Image id=\"Icon.16\" DefaultValue=\"{$this->xml($icon16)}\"/><bt:Image id=\"Icon.32\" DefaultValue=\"{$this->xml($icon)}\"/><bt:Image id=\"Icon.80\" DefaultValue=\"{$this->xml($icon80)}\"/></bt:Images>
-      <bt:Urls><bt:Url id=\"Taskpane.Url\" DefaultValue=\"{$this->xml($taskpaneUrl)}\"/><bt:Url id=\"Autorun.Url\" DefaultValue=\"{$this->xml($autorunUrl)}\"/></bt:Urls>
+      <bt:Urls><bt:Url id=\"Taskpane.Url\" DefaultValue=\"{$this->xml($taskpaneUrl)}\"/><bt:Url id=\"Autorun.Url\" DefaultValue=\"{$this->xml($autorunUrl)}\"/><bt:Url id=\"Autorun.Script.Url\" DefaultValue=\"{$this->xml($autorunScriptUrl)}\"/></bt:Urls>
       <bt:ShortStrings><bt:String id=\"Group.Label\" DefaultValue=\"TRINOX\"/><bt:String id=\"Button.Label\" DefaultValue=\"Signature\"/></bt:ShortStrings>
       <bt:LongStrings><bt:String id=\"Button.Tooltip\" DefaultValue=\"{$this->xml($description)}\"/></bt:LongStrings>
     </Resources>
@@ -195,6 +212,16 @@ class AddinBuildService
         File::put(public_path('manifest-latest.xml'), $manifestContent);
         File::ensureDirectoryExists(public_path('addin'));
         File::copyDirectory($distPath, public_path('addin'));
+    }
+
+    private function findAutorunScriptPath(string $distPath): ?string
+    {
+        $files = File::glob($distPath.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'autorun-*.js');
+        if (! $files) {
+            return null;
+        }
+
+        return 'assets/'.basename((string) $files[0]);
     }
 
     private function buildAppDomain(string $url): string

@@ -19,6 +19,9 @@ export default defineConfig(async () => {
       },
     },
     build: {
+      modulePreload: {
+        polyfill: false,
+      },
       rollupOptions: {
         input: {
           taskpane: "index.html",
