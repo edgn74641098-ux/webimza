@@ -1,4 +1,5 @@
 const PROD_API_BASE = "https://webimza.duckdns.org/api";
+const DEFAULT_ADDIN_VERSION = "1.1.0";
 
 function resolveApiBaseUrl(): string {
   if (typeof window === "undefined") return PROD_API_BASE;
@@ -11,5 +12,12 @@ function resolveApiBaseUrl(): string {
 
 export const config = {
   apiBaseUrl: resolveApiBaseUrl(),
-  addinVersion: "1.1.0",
+  addinVersion: resolveAddinVersion(),
 };
+
+function resolveAddinVersion(): string {
+  if (typeof window === "undefined") return DEFAULT_ADDIN_VERSION;
+
+  const value = new URLSearchParams(window.location.search).get("v");
+  return value && value.trim() ? value.trim() : DEFAULT_ADDIN_VERSION;
+}

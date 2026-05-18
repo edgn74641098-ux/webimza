@@ -76,9 +76,12 @@ class AddinBuildService
     private function renderManifest(AddinConfig $config, string $buildType): string
     {
         $id = $config->manifest_id ?: '8c6b669e-4f1d-4fea-8aaf-7dff44f1e4d4';
-        $taskpaneUrl = $config->taskpane_url ?: 'https://localhost:5173/index.html';
-        $autorunUrl = $config->autorun_url ?: 'https://localhost:5173/autorun.html';
-        $origin = $this->buildAppDomain($taskpaneUrl);
+        $baseTaskpaneUrl = $config->taskpane_url ?: 'https://localhost:5173/index.html';
+        $baseAutorunUrl = $config->autorun_url ?: 'https://localhost:5173/autorun.html';
+        $version = $config->manifest_version ?: '1.1.0.0';
+        $taskpaneUrl = $this->appendVersionQuery($baseTaskpaneUrl, $version);
+        $autorunUrl = $this->appendVersionQuery($baseAutorunUrl, $version);
+        $origin = $this->buildAppDomain($baseTaskpaneUrl);
         $icon16 = $this->buildAssetUrl($origin, 'icon-16.png');
         $icon = $config->icon_url ?: $this->buildAssetUrl($origin, 'icon-32.png');
         $high = $config->highres_icon_url ?: $this->buildAssetUrl($origin, 'icon-64.png');
@@ -86,7 +89,6 @@ class AddinBuildService
         $supportUrl = $config->support_url ?: 'https://trinoxmetal.com';
         $providerName = $config->provider_name ?: 'TRINOX';
         $displayName = $config->display_name ?: 'TRINOX Signature Manager';
-        $version = $config->manifest_version ?: '1.1.0.0';
         $description = $this->buildDescription($version, $buildType);
         $appDomain = $origin;
 
@@ -214,6 +216,13 @@ class AddinBuildService
     private function buildAssetUrl(string $origin, string $filename): string
     {
         return rtrim($origin, '/').'/addin/'.$filename;
+    }
+
+    private function appendVersionQuery(string $url, string $version): string
+    {
+        $delimiter = str_contains($url, '?') ? '&' : '?';
+
+        return $url.$delimiter.'v='.rawurlencode($version);
     }
 
     private function assertValidXml(string $xml): void
