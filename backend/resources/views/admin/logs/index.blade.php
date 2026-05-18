@@ -53,10 +53,10 @@
                         <tr>
                             <td>{{ optional($log->created_at)?->format('Y-m-d H:i:s') ?? '-' }}</td>
                             <td>{{ $log->user?->email ?? '-' }}</td>
-                            <td>{{ $log->event_type ?? '-' }}</td>
+                            <td class="break-words">{{ $log->event_type ?? '-' }}</td>
                             <td><x-ui.badge :status="$log->status ?? 'default'">{{ $log->status ?? '-' }}</x-ui.badge></td>
-                            <td>{{ $log->message ?: '-' }}</td>
-                            <td>{{ $log->device_id ?? '-' }}</td>
+                            <td class="max-w-[340px] break-words whitespace-pre-wrap">{{ $log->message ?: '-' }}</td>
+                            <td class="max-w-[220px] break-all">{{ $log->device_id ?? '-' }}</td>
                             <td><a href="{{ route('admin.logs.show', $log) }}"><x-ui.button type="button" variant="secondary">Detay</x-ui.button></a></td>
                         </tr>
                     @endforeach

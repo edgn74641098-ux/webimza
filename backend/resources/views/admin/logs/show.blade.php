@@ -11,13 +11,13 @@
         <x-ui.card>
             <div class="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
                 <div><span class="text-slate-500">Zaman:</span> <strong>{{ optional($log->created_at)?->format('Y-m-d H:i:s') ?? '-' }}</strong></div>
-                <div><span class="text-slate-500">Kullanici:</span> <strong>{{ $log->user?->email ?? '-' }}</strong></div>
-                <div><span class="text-slate-500">Event:</span> <strong>{{ $log->event_type ?? '-' }}</strong></div>
+                <div><span class="text-slate-500">Kullanici:</span> <strong class="block break-words">{{ $log->user?->email ?? '-' }}</strong></div>
+                <div><span class="text-slate-500">Event:</span> <strong class="block break-words">{{ $log->event_type ?? '-' }}</strong></div>
                 <div><span class="text-slate-500">Status:</span> <strong>{{ $log->status ?? '-' }}</strong></div>
-                <div><span class="text-slate-500">Device:</span> <strong>{{ $log->device_id ?? '-' }}</strong></div>
-                <div><span class="text-slate-500">Mesaj:</span> <strong>{{ $log->message ?: '-' }}</strong></div>
-                <div><span class="text-slate-500">Request ID:</span> <strong>{{ $requestId }}</strong></div>
-                <div><span class="text-slate-500">Error code:</span> <strong>{{ $errorCode }}</strong></div>
+                <div><span class="text-slate-500">Device:</span> <strong class="block break-all">{{ $log->device_id ?? '-' }}</strong></div>
+                <div><span class="text-slate-500">Mesaj:</span> <strong class="block break-words whitespace-pre-wrap">{{ $log->message ?: '-' }}</strong></div>
+                <div><span class="text-slate-500">Request ID:</span> <strong class="block break-all">{{ $requestId }}</strong></div>
+                <div><span class="text-slate-500">Error code:</span> <strong class="block break-all">{{ $errorCode }}</strong></div>
             </div>
         </x-ui.card>
 
@@ -31,10 +31,10 @@
         <x-ui.card title="Device bilgisi">
             @if($log->device)
                 <div class="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-                    <div><span class="text-slate-500">Client type:</span> <strong>{{ $log->device->client_type ?? '-' }}</strong></div>
+                    <div><span class="text-slate-500">Client type:</span> <strong class="block break-words">{{ $log->device->client_type ?? '-' }}</strong></div>
                     <div><span class="text-slate-500">Platform:</span> <strong>{{ $log->device->platform ?? '-' }}</strong></div>
-                    <div><span class="text-slate-500">Office version:</span> <strong>{{ $log->device->office_version ?? '-' }}</strong></div>
-                    <div><span class="text-slate-500">Add-in version:</span> <strong>{{ $log->device->addin_version ?? '-' }}</strong></div>
+                    <div><span class="text-slate-500">Office version:</span> <strong class="block break-all">{{ $log->device->office_version ?? '-' }}</strong></div>
+                    <div><span class="text-slate-500">Add-in version:</span> <strong class="block break-all">{{ $log->device->addin_version ?? '-' }}</strong></div>
                 </div>
             @else
                 <x-ui.empty-state title="Device bilgisi yok" description="Bu log kaydina bagli cihaz kaydi bulunamadi." />
