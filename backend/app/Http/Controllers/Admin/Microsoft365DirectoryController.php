@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\MicrosoftGraph\GraphDirectorySyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -45,7 +46,14 @@ class Microsoft365DirectoryController extends Controller
             'prompt' => 'select_account',
         ]);
 
-        return redirect()->away($this->authorityUrl().'/oauth2/v2.0/authorize?'.$query);
+        $authorizeUrl = $this->authorityUrl().'/oauth2/v2.0/authorize?'.$query;
+        Log::info('Microsoft 365 delegated auth redirect prepared.', [
+            'tenant' => config('services.microsoft_graph.tenant_id'),
+            'client_id' => config('services.microsoft_graph.client_id'),
+            'redirect_uri' => route('admin.microsoft365.callback'),
+        ]);
+
+        return redirect()->away($authorizeUrl);
     }
 
     public function callback(Request $request)

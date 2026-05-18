@@ -241,14 +241,18 @@
                                     <span class="text-sm text-slate-600">Kimlik bilgileri</span>
                                     <x-ui.badge :status="$graphSyncConfigured ? 'active' : 'warning'">{{ $graphSyncConfigured ? 'hazir' : 'eksik' }}</x-ui.badge>
                                 </div>
-                                <a href="{{ route('admin.microsoft365.connect') }}">
-                                    <x-ui.button class="mt-2 w-full" type="button" :disabled="! $graphSyncConfigured">
+                                @if($graphSyncConfigured)
+                                    <a href="{{ route('admin.microsoft365.connect') }}" class="ui-btn-primary mt-2 w-full justify-center">
                                         Microsoft ile Baglan
-                                    </x-ui.button>
-                                </a>
+                                    </a>
+                                @else
+                                    <div class="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+                                        Baglanmak icin once Tenant ID ve Client ID alanlarini doldurup ayarlari kaydedin.
+                                    </div>
+                                @endif
                                 @if($graphSessionConnected)
-                                    <a href="{{ route('admin.microsoft365.directory') }}">
-                                        <x-ui.button class="mt-2 w-full" variant="secondary" type="button">Kullanicilari ve Gruplari Sec</x-ui.button>
+                                    <a href="{{ route('admin.microsoft365.directory') }}" class="ui-btn-secondary mt-2 w-full justify-center">
+                                        Kullanicilari ve Gruplari Sec
                                     </a>
                                 @endif
                                 <div class="rounded-md bg-slate-50 p-2 text-[11px] leading-5 text-slate-500">
