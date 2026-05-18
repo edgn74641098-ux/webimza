@@ -53,6 +53,13 @@ export async function reportResult(payload: {
   status: "success" | "error";
   message?: string;
   eventType?: string;
+  addinVersion?: string;
+  clientType?: string;
+  officeVersion?: string;
+  host?: string;
+  platform?: string;
+  apiBaseUrl?: string;
+  metadata?: Record<string, unknown>;
 }) {
   return postJson<{ success: boolean }>(`${config.apiBaseUrl}/addin/signature/report`, payload);
 }

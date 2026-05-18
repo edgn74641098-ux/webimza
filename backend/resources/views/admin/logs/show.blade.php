@@ -18,6 +18,10 @@
                 <div><span class="text-slate-500">Mesaj:</span> <strong class="block break-words whitespace-pre-wrap">{{ $log->message ?: '-' }}</strong></div>
                 <div><span class="text-slate-500">Request ID:</span> <strong class="block break-all">{{ $requestId }}</strong></div>
                 <div><span class="text-slate-500">Error code:</span> <strong class="block break-all">{{ $errorCode }}</strong></div>
+                <div><span class="text-slate-500">Reported add-in version:</span> <strong class="block break-all">{{ $reportedAddinVersion }}</strong></div>
+                <div><span class="text-slate-500">Reported client type:</span> <strong class="block break-words">{{ $reportedClientType }}</strong></div>
+                <div><span class="text-slate-500">Reported office version:</span> <strong class="block break-all">{{ $reportedOfficeVersion }}</strong></div>
+                <div><span class="text-slate-500">Reported platform:</span> <strong class="block break-words">{{ $reportedPlatform }}</strong></div>
             </div>
         </x-ui.card>
 

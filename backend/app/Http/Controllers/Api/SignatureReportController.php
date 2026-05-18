@@ -19,6 +19,13 @@ class SignatureReportController extends Controller
             'status' => ['required', 'string'],
             'message' => ['nullable', 'string'],
             'eventType' => ['nullable', 'string'],
+            'addinVersion' => ['nullable', 'string'],
+            'clientType' => ['nullable', 'string'],
+            'officeVersion' => ['nullable', 'string'],
+            'host' => ['nullable', 'string'],
+            'platform' => ['nullable', 'string'],
+            'apiBaseUrl' => ['nullable', 'string'],
+            'metadata' => ['nullable', 'array'],
         ]);
 
         $user = User::where('email', $payload['email'])->first();

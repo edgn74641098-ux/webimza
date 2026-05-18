@@ -95,6 +95,10 @@ class LogController extends Controller
             'prettyPayload' => json_encode($payload ?: new \stdClass(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
             'requestId' => $payload['request_id'] ?? $payload['requestId'] ?? '-',
             'errorCode' => $payload['error_code'] ?? $payload['code'] ?? '-',
+            'reportedAddinVersion' => $payload['addinVersion'] ?? $log->device?->addin_version ?? '-',
+            'reportedClientType' => $payload['clientType'] ?? $log->device?->client_type ?? '-',
+            'reportedOfficeVersion' => $payload['officeVersion'] ?? $log->device?->office_version ?? '-',
+            'reportedPlatform' => $payload['platform'] ?? $log->device?->platform ?? '-',
         ]);
     }
 }

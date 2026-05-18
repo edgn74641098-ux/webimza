@@ -285,12 +285,36 @@ export async function sendDiagnostic(): Promise<void> {
   const email = getEmail();
   const cache = await getCache(email);
   const diag = getDiagnostics();
+  const clientType = getClientType();
+
   await reportResult({
     email,
     deviceId: cache.deviceId,
     status: "success",
     eventType: "diagnostic",
-    message: `diagnostic:${JSON.stringify(diag)}`,
+    message: "Structured diagnostic report",
+    addinVersion: diag.addinVersion,
+    clientType,
+    officeVersion: diag.officeVersion,
+    host: diag.host,
+    platform: diag.platform,
+    apiBaseUrl: diag.apiBaseUrl,
+    metadata: {
+      diagnostics: diag,
+      cache: {
+        deviceId: cache.deviceId,
+        lastCheckedAt: cache.lastCheckedAt ?? null,
+        nextCheckAt: cache.nextCheckAt ?? null,
+        cacheSeconds: cache.cacheSeconds ?? null,
+        lastSignatureVersion: cache.lastSignatureVersion ?? null,
+        lastSignatureHash: cache.lastSignatureHash ?? null,
+        lastSuccessfulApplyAt: cache.lastSuccessfulApplyAt ?? null,
+      },
+      context: {
+        sentAt: new Date().toISOString(),
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+      },
+    },
   });
 }
 

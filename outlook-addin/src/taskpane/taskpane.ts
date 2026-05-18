@@ -47,6 +47,15 @@ if (root) {
         </div>
       </section>
 
+      <section class="tp-card">
+        <h2>Surum ve Debug</h2>
+        <div class="tp-row"><span>Add-in version</span><strong id="dbg-version">-</strong></div>
+        <div class="tp-row"><span>Office version</span><strong id="dbg-office">-</strong></div>
+        <div class="tp-row"><span>Client / Platform</span><strong id="dbg-client">-</strong></div>
+        <div class="tp-row"><span>Device ID</span><strong id="dbg-device">-</strong></div>
+        <div class="tp-row"><span>API URL</span><strong id="dbg-api">-</strong></div>
+      </section>
+
       <details class="tp-card">
         <summary>Diagnostic</summary>
         <div class="tp-row"><span>Host</span><strong id="d-host">-</strong></div>
@@ -152,6 +161,9 @@ Office.onReady(async () => {
     setText("d-sign", diagnostics.setSignatureAsyncSupported ? "Destekli" : "Desteksiz");
     setText("d-version", String(diagnostics.addinVersion ?? "-"));
     setText("d-api", String(diagnostics.apiBaseUrl ?? "-"));
+    setText("dbg-version", String(diagnostics.addinVersion ?? "-"));
+    setText("dbg-office", String(diagnostics.officeVersion ?? "-"));
+    setText("dbg-api", String(diagnostics.apiBaseUrl ?? "-"));
 
     if (!diagnostics.mailboxContextAvailable) {
       setStateBanner("unsupported_client");
@@ -164,6 +176,8 @@ Office.onReady(async () => {
     setText("u-name", client.displayName || "-");
     setText("u-client", client.clientType || "-");
     setText("d-device", client.deviceId || "-");
+    setText("dbg-device", client.deviceId || "-");
+    setText("dbg-client", `${client.clientType || "-"} / ${String(diagnostics.platform ?? "-")}`);
 
     if (!diagnostics.mailboxRequirement110Supported || !diagnostics.setSignatureAsyncSupported) {
       setStateBanner("unsupported_client");
