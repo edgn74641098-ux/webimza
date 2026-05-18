@@ -149,8 +149,8 @@ class AddinBuildService
     </Requirements>
     <Hosts>
       <Host xsi:type=\"MailHost\">
+        {$runtimeBlock}
         <DesktopFormFactor>
-          {$runtimeBlock}
           <FunctionFile resid=\"Autorun.Url\"/>
           <ExtensionPoint xsi:type=\"MessageComposeCommandSurface\">
             <OfficeTab id=\"TabDefault\">
