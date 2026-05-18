@@ -92,12 +92,14 @@ class AddinBuildService
         $description = $this->buildDescription($version, $buildType);
         $appDomain = $origin;
 
-        // Enable autorun in both manual and automatic manifests.
-        $launchEventBlock = "
+        $launchEventBlock = '';
+        if ($buildType === 'automatic_event') {
+            $launchEventBlock = "
           <ExtensionPoint xsi:type=\"LaunchEvent\">
             <LaunchEvents><LaunchEvent Type=\"OnNewMessageCompose\" FunctionName=\"onNewMessageComposeHandler\" /></LaunchEvents>
             <SourceLocation resid=\"Autorun.Url\"/>
           </ExtensionPoint>";
+        }
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
 <OfficeApp xmlns=\"http://schemas.microsoft.com/office/appforoffice/1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bt=\"http://schemas.microsoft.com/office/officeappbasictypes/1.0\" xmlns:mailappor=\"http://schemas.microsoft.com/office/mailappversionoverrides\" xsi:type=\"MailApp\">
@@ -178,10 +180,14 @@ class AddinBuildService
 
     private function buildDescription(string $version, string $buildType): string
     {
-        $label = $buildType === 'automatic_event' ? 'Automatic Outlook compose' : 'Manual Outlook test';
+        $isAutomatic = $buildType === 'automatic_event';
+        $label = $isAutomatic ? 'Automatic Outlook compose' : 'Manual Outlook test';
+        $features = $isAutomatic
+            ? 'auto apply on new mail, manual refresh, API status check, diagnostics'
+            : 'manual apply, manual refresh, API status check, diagnostics';
         $builtAt = now()->timezone('Europe/Istanbul')->format('Y-m-d H:i T');
 
-        return "TRINOX centralized email signature manager. Features: auto apply on new mail, manual refresh, API status check, diagnostics. Version {$version}; build: {$label}; created: {$builtAt}.";
+        return "TRINOX centralized email signature manager. Features: {$features}. Version {$version}; build: {$label}; created: {$builtAt}.";
     }
 
     private function publishLatestBuild(string $manifestContent, string $distPath): void

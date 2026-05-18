@@ -78,9 +78,17 @@
             </x-ui.card>
 
             <x-ui.card title="3. Build Actions">
-                <div class="space-y-2">
-                    <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="manual_basic"><x-ui.button type="submit" class="w-full">Kisisel Outlook Test Manifesti olustur</x-ui.button></form>
-                    <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="automatic_event"><x-ui.button type="submit" class="w-full" variant="secondary">M365 Admin Otomatik Manifest olustur</x-ui.button></form>
+                <div class="space-y-3">
+                    <div class="rounded-lg border border-slate-200 p-3">
+                        <p class="mb-2 text-sm font-medium text-slate-900">Kisisel test manifesti</p>
+                        <p class="mb-3 text-xs text-slate-500">Outlook custom add-in import icindir. Manual imza ekleme, yenileme ve debug ekranini icerir; otomatik compose eventi icermez.</p>
+                        <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="manual_basic"><x-ui.button type="submit" class="w-full">Kisisel Outlook Test Manifesti olustur</x-ui.button></form>
+                    </div>
+                    <div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                        <p class="mb-2 text-sm font-medium text-blue-950">M365 otomatik manifest</p>
+                        <p class="mb-3 text-xs text-blue-800">Yeni mail acilinca otomatik imza ekleme icin LaunchEvent icerir. Microsoft 365 Admin Center uzerinden dagitim icin kullanin.</p>
+                        <form method="POST" action="{{ route('admin.deployment.build') }}">@csrf<input type="hidden" name="build_type" value="automatic_event"><x-ui.button type="submit" class="w-full" variant="secondary">M365 Admin Otomatik Manifest olustur</x-ui.button></form>
+                    </div>
                 </div>
             </x-ui.card>
         </div>
