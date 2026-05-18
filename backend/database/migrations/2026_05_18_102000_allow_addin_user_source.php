@@ -40,7 +40,16 @@ return new class extends Migration
             updated_at datetime null,
             foreign key(department_id) references departments(id) on delete set null
         )');
-        DB::statement('INSERT INTO users_new SELECT * FROM users');
+        DB::statement('INSERT INTO users_new (
+            id, entra_id, name, email, username, domain, department_id, title, company, phone, mobile, office,
+            address, website, is_active, source, last_seen_at, email_verified_at, password, remember_token,
+            created_at, updated_at
+        )
+        SELECT
+            id, entra_id, name, email, username, domain, department_id, title, company, phone, mobile, office,
+            address, website, is_active, COALESCE(source, "manual"), last_seen_at, email_verified_at, password,
+            remember_token, created_at, updated_at
+        FROM users');
         DB::statement('DROP TABLE users');
         DB::statement('ALTER TABLE users_new RENAME TO users');
         DB::statement('CREATE UNIQUE INDEX users_email_unique ON users (email)');
@@ -83,7 +92,16 @@ return new class extends Migration
             updated_at datetime null,
             foreign key(department_id) references departments(id) on delete set null
         )');
-        DB::statement('INSERT INTO users_new SELECT * FROM users');
+        DB::statement('INSERT INTO users_new (
+            id, entra_id, name, email, username, domain, department_id, title, company, phone, mobile, office,
+            address, website, is_active, source, last_seen_at, email_verified_at, password, remember_token,
+            created_at, updated_at
+        )
+        SELECT
+            id, entra_id, name, email, username, domain, department_id, title, company, phone, mobile, office,
+            address, website, is_active, COALESCE(source, "manual"), last_seen_at, email_verified_at, password,
+            remember_token, created_at, updated_at
+        FROM users');
         DB::statement('DROP TABLE users');
         DB::statement('ALTER TABLE users_new RENAME TO users');
         DB::statement('CREATE UNIQUE INDEX users_email_unique ON users (email)');
